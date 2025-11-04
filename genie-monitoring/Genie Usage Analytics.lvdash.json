@@ -1,0 +1,1876 @@
+{
+  "datasets": [
+    {
+      "name": "07fef115",
+      "displayName": "Conversations - T90D",
+      "queryLines": [
+        "SELECT * FROM renjiharold_demo.genie_analytics.g_conv_last_90d"
+      ],
+      "catalog": "renjiharold_demo",
+      "schema": "genie_monitoring"
+    },
+    {
+      "name": "3dd860a4",
+      "displayName": "Daily Unique Users - T90D",
+      "queryLines": [
+        "SELECT * FROM renjiharold_demo.genie_analytics.g_daily_unique_creators_last_90d"
+      ],
+      "catalog": "renjiharold_demo",
+      "schema": "genie_monitoring"
+    },
+    {
+      "name": "6d91761f",
+      "displayName": "Top Creators Data - Last 90 Days",
+      "queryLines": [
+        "SELECT * FROM renjiharold_demo.genie_analytics.g_top_creators_90d"
+      ],
+      "catalog": "renjiharold_demo",
+      "schema": "genie_monitoring"
+    },
+    {
+      "name": "5f6f84a0",
+      "displayName": "Messages per Conv",
+      "queryLines": [
+        "SELECT * FROM renjiharold_demo.genie_analytics.g_messages_per_conversation_90d \n",
+        "LIMIT 100"
+      ],
+      "catalog": "renjiharold_demo",
+      "schema": "genie_monitoring"
+    },
+    {
+      "name": "fa86c0dd",
+      "displayName": "Conversation start hour",
+      "queryLines": [
+        "SELECT * FROM renjiharold_demo.genie_analytics.g_conversation_hour_hist_90d"
+      ],
+      "catalog": "renjiharold_demo",
+      "schema": "genie_monitoring"
+    },
+    {
+      "name": "9383c62e",
+      "displayName": "SQL Cost per Day - T30D",
+      "queryLines": [
+        "SELECT\n",
+        "  u.usage_metadata.warehouse_id AS warehouse_id,\n",
+        "  w.warehouse_name,\n",
+        "  u.usage_date,\n",
+        "  SUM(u.usage_quantity * lp.pricing.effective_list.default) AS total_cost_usd\n",
+        "FROM\n",
+        "  system.billing.usage u\n",
+        "JOIN\n",
+        "  system.billing.list_prices lp\n",
+        "    ON u.sku_name = lp.sku_name\n",
+        "    AND u.usage_end_time >= lp.price_start_time\n",
+        "    AND (lp.price_end_time IS NULL OR u.usage_end_time < lp.price_end_time)\n",
+        "JOIN system.compute.warehouses w\n",
+        "  ON u.usage_metadata.warehouse_id = w.warehouse_id\n",
+        "JOIN (\n",
+        "  select distinct warehouse_id from renjiharold_demo.genie_analytics.genie_spaces\n",
+        ") wh ON u.usage_metadata.warehouse_id = wh.warehouse_id\n",
+        "WHERE\n",
+        "    u.sku_name like 'ENTERPRISE_SERVERLESS_SQL_COMPUTE_%'\n",
+        "    AND lp.currency_code = 'USD'\n",
+        "    AND u.usage_date >= DATEADD(day, -30, CURRENT_TIMESTAMP())\n",
+        "GROUP BY 1,2,3\n",
+        "ORDER BY 4 DESC"
+      ]
+    },
+    {
+      "name": "3ba30964",
+      "displayName": "Conversation Feedback",
+      "queryLines": [
+        "SELECT\n",
+        "  user_identity.email as user_email,\n",
+        "  action_name,\n",
+        "  request_params.space_id,\n",
+        "  request_params.feedback_rating,\n",
+        "  request_params.conversation_id,\n",
+        "  request_params.message_id\n",
+        "FROM\n",
+        "  system.access.audit\n",
+        "WHERE\n",
+        "  service_name = 'aibiGenie'\n",
+        "  AND action_name = 'updateConversationMessageFeedback'\n",
+        "  AND event_date >= current_date() - interval 2 days\n",
+        "  -- and request_params.space_id  = \"01f08d8be94b1fec8bde6037d5eaf022\""
+      ],
+      "catalog": "system",
+      "schema": "access"
+    },
+    {
+      "name": "0050f939",
+      "displayName": "User Review Submission - Last 30 Days",
+      "queryLines": [
+        "SELECT\n",
+        "  user_identity.email as user_email,\n",
+        "  action_name,\n",
+        "  request_params.space_id,\n",
+        "  request_params.conversation_id,\n",
+        "  request_params.message_id\n",
+        "FROM\n",
+        "  system.access.audit\n",
+        "WHERE\n",
+        "    service_name = 'aibiGenie'\n",
+        "    AND action_name = 'createConversationMessageComment'\n",
+        "    AND event_date >= current_date() - interval 2 days\n",
+        "    -- and request_params.space_id  = \"01f08d8be94b1fec8bde6037d5eaf022\""
+      ]
+    },
+    {
+      "name": "f2d9d460",
+      "displayName": "Spaces Created Event - T7D",
+      "queryLines": [
+        "select \n",
+        "count(*) as total_spaces\n",
+        "from system.access.audit\n",
+        "where service_name = \"aibiGenie\"\n",
+        "and action_name = \"createSpace\"\n",
+        "and event_date >= DATEADD(day, -7, CURRENT_TIMESTAMP());"
+      ]
+    },
+    {
+      "name": "75e1e8b6",
+      "displayName": "New Users - T7D",
+      "queryLines": [
+        "WITH first_seen AS (\n",
+        "  SELECT author_id, MIN(created_timestamp) AS first_msg_ts\n",
+        "  FROM renjiharold_demo.genie_analytics.genie_messages\n",
+        "  GROUP BY author_id\n",
+        ")\n",
+        "SELECT COUNT(*) AS new_users_7d\n",
+        "FROM first_seen\n",
+        "WHERE first_msg_ts >= DATEADD(day, -7, CURRENT_TIMESTAMP())"
+      ]
+    },
+    {
+      "name": "90d91cbc",
+      "displayName": "Power Users",
+      "queryLines": [
+        "-- Power Users - Users with high number of conversations in the last 30 days\n",
+        "WITH convs AS (\n",
+        "  SELECT author_id, COUNT(*) AS convs_30d\n",
+        "  FROM renjiharold_demo.genie_analytics.genie_messages\n",
+        "  WHERE created_timestamp >= DATEADD(day, -30, CURRENT_TIMESTAMP())\n",
+        "  GROUP BY author_id\n",
+        ")\n",
+        "SELECT COUNT(*) AS power_users_30d\n",
+        "FROM convs\n",
+        "WHERE convs_30d >= 5"
+      ]
+    },
+    {
+      "name": "3aafab7e",
+      "displayName": "Spaces Cloned Event - T7D",
+      "queryLines": [
+        "select \n",
+        "count(*) as total_spaces\n",
+        "from system.access.audit\n",
+        "where service_name = \"aibiGenie\"\n",
+        "and action_name = \"cloneSpace\"\n",
+        "and event_date >= DATEADD(day, -7, CURRENT_TIMESTAMP());"
+      ]
+    },
+    {
+      "name": "54026753",
+      "displayName": "Total Spaces",
+      "queryLines": [
+        "SELECT COUNT(DISTINCT space_id) AS total_spaces\n",
+        "FROM renjiharold_demo.genie_analytics.genie_spaces"
+      ]
+    },
+    {
+      "name": "475664bf",
+      "displayName": "Event per Day - T7D",
+      "queryLines": [
+        "select \n",
+        "event_date,\n",
+        "action_name,\n",
+        "count(action_name) as event_count\n",
+        "from system.access.audit\n",
+        "where service_name = \"aibiGenie\"\n",
+        "and action_name in (\"trashSpace\", \"createSpace\", \"cloneSpace\")\n",
+        "and event_date >= DATEADD(day, -7, CURRENT_TIMESTAMP())\n",
+        "group by event_date, action_name\n",
+        "order by event_date;"
+      ]
+    },
+    {
+      "name": "befd4a1d",
+      "displayName": "Average DAU - T7D",
+      "queryLines": [
+        "SELECT\n",
+        "    AVG(dau) AS avg_dau_last_7_days\n",
+        "FROM (\n",
+        "    SELECT dau\n",
+        "    FROM renjiharold_demo.genie_analytics.g_dau_by_messages_90d\n",
+        "    ORDER BY day DESC\n",
+        "    LIMIT 7\n",
+        ")"
+      ]
+    },
+    {
+      "name": "52c4bb06",
+      "displayName": "Most popular Spaces",
+      "queryLines": [
+        "-- popularity based on no.of conversations per space\n",
+        "-- SELECT\n",
+        "--   s.space_id,\n",
+        "--   s.title,\n",
+        "--   c.conversations_count,\n",
+        "--   DENSE_RANK() OVER (ORDER BY c.conversations_count DESC) AS popularity_rank\n",
+        "-- FROM renjiharold_demo.genie_analytics.genie_spaces s\n",
+        "-- JOIN (\n",
+        "--   SELECT space_id, COUNT(*) AS conversations_count\n",
+        "--   FROM renjiharold_demo.genie_analytics.genie_conversations\n",
+        "--   GROUP BY space_id\n",
+        "-- ) c ON s.space_id = c.space_id\n",
+        "-- ORDER BY c.conversations_count DESC, s.space_id;\n",
+        "\n",
+        "-- popularity based on no.of users per space\n",
+        "SELECT\n",
+        "  s.space_id,\n",
+        "  s.title,\n",
+        "  c.user_count,\n",
+        "  DENSE_RANK() OVER (ORDER BY c.user_count DESC) AS popularity_rank\n",
+        "FROM renjiharold_demo.genie_analytics.genie_spaces s\n",
+        "JOIN (\n",
+        "  SELECT space_id, COUNT(distinct author_id) AS user_count\n",
+        "  FROM renjiharold_demo.genie_analytics.genie_messages\n",
+        "  GROUP BY space_id\n",
+        ") c ON s.space_id = c.space_id\n",
+        "ORDER BY c.user_count DESC, s.space_id;"
+      ]
+    },
+    {
+      "name": "c3fe56c2",
+      "displayName": "List of Spaces",
+      "queryLines": [
+        "select \n",
+        "  distinct(title) \n",
+        "from renjiharold_demo.genie_analytics.genie_spaces\n",
+        "order by title;"
+      ]
+    },
+    {
+      "name": "a6c0ba1f",
+      "displayName": "List of warehouses",
+      "queryLines": [
+        "select distinct s.warehouse_id, w.warehouse_name\n",
+        "from renjiharold_demo.genie_analytics.genie_spaces s\n",
+        "join system.compute.warehouses w\n",
+        "  on s.warehouse_id = w.warehouse_id\n"
+      ]
+    },
+    {
+      "name": "188d948d",
+      "displayName": "Analytics Space Popularity Rankings",
+      "queryLines": [
+        "SELECT\n",
+        "  s.space_id,\n",
+        "  s.title,\n",
+        "  c.conversations_count,\n",
+        "  DENSE_RANK() OVER (ORDER BY c.conversations_count DESC) AS popularity_rank\n",
+        "FROM renjiharold_demo.genie_analytics.genie_spaces s\n",
+        "JOIN (\n",
+        "  SELECT space_id, COUNT(*) AS conversations_count\n",
+        "  FROM renjiharold_demo.genie_analytics.genie_messages\n",
+        "  GROUP BY space_id\n",
+        ") c ON s.space_id = c.space_id\n",
+        "ORDER BY c.conversations_count DESC, s.space_id;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "cdb4d6ec",
+      "displayName": "Usage Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "284cdf68",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "07fef115",
+                  "fields": [
+                    {
+                      "name": "daily(day)",
+                      "expression": "DATE_TRUNC(\"DAY\", `day`)"
+                    },
+                    {
+                      "name": "sum(conversations)",
+                      "expression": "SUM(`conversations`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(day)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(conversations)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Conversations over Time",
+                "showTitle": true
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "a97f0833",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "3dd860a4",
+                  "fields": [
+                    {
+                      "name": "daily(day)",
+                      "expression": "DATE_TRUNC(\"DAY\", `day`)"
+                    },
+                    {
+                      "name": "sum(unique_creators)",
+                      "expression": "SUM(`unique_creators`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(day)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(unique_creators)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Daily Unique Users Over Time",
+                "showTitle": true
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 17,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "806a1771",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6d91761f",
+                  "fields": [
+                    {
+                      "name": "user",
+                      "expression": "`user`"
+                    },
+                    {
+                      "name": "sum(conversation_count)",
+                      "expression": "SUM(`conversation_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "user",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(conversation_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top Users - Last 90 Days"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 23,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "1dc0549e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5f6f84a0",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "user",
+                      "expression": "`user`"
+                    },
+                    {
+                      "name": "messages",
+                      "expression": "`messages`"
+                    },
+                    {
+                      "name": "first_msg_ts",
+                      "expression": "`first_msg_ts`"
+                    },
+                    {
+                      "name": "last_msg_ts",
+                      "expression": "`last_msg_ts`"
+                    },
+                    {
+                      "name": "duration_min",
+                      "expression": "`duration_min`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "title",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "title",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "user",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "user",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "messages",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "messages",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "first_msg_ts",
+                    "dateTimeFormat": "DD/MM/YYYY HH:mm:ss",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "datetime",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "first_msg_ts",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_msg_ts",
+                    "dateTimeFormat": "DD/MM/YYYY HH:mm:ss",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "datetime",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100005,
+                    "title": "last_msg_ts",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "duration_min",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100006,
+                    "title": "duration_min",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "conversation_id",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100000,
+                  "title": "conversation_id",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Messages and duration per Conversation "
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 29,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "d7f3932e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fa86c0dd",
+                  "fields": [
+                    {
+                      "name": "bin(hour_of_day, binWidth=1)",
+                      "expression": "BIN_FLOOR(`hour_of_day`, 1)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(hour_of_day, binWidth=1)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Conversation Start Hour Distribution"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 23,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "217c9fad",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "3ba30964",
+                  "fields": [
+                    {
+                      "name": "count(feedback_rating)",
+                      "expression": "COUNT(`feedback_rating`)"
+                    },
+                    {
+                      "name": "feedback_rating",
+                      "expression": "`feedback_rating`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(feedback_rating)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "feedback_rating",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Conversation Rating"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d7b67a7f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0050f939",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(*)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "User Review Requests"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 9,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "e17e659f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "54026753",
+                  "fields": [
+                    {
+                      "name": "total_spaces",
+                      "expression": "`total_spaces`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_spaces"
+                }
+              },
+              "style": {
+                "fontColor": {
+                  "light": "#53BC5D"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Spaces"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "446a1206",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "befd4a1d",
+                  "fields": [
+                    {
+                      "name": "avg_dau_last_7_days",
+                      "expression": "`avg_dau_last_7_days`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_dau_last_7_days"
+                }
+              },
+              "style": {
+                "fontColor": {
+                  "light": "#2783CF"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Average Daily Users Last 7 Days"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "5f7aa711",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "75e1e8b6",
+                  "fields": [
+                    {
+                      "name": "new_users_7d",
+                      "expression": "`new_users_7d`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "new_users_7d"
+                }
+              },
+              "style": {
+                "fontColor": {
+                  "light": "#E39E35"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "New Users Last 7 Days"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "fdb9788d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "90d91cbc",
+                  "fields": [
+                    {
+                      "name": "power_users_30d",
+                      "expression": "`power_users_30d`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "power_users_30d"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Power Users",
+                "showDescription": false,
+                "description": ""
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "d6efe047",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f2d9d460",
+                  "fields": [
+                    {
+                      "name": "total_spaces",
+                      "expression": "`total_spaces`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_spaces"
+                }
+              },
+              "style": {
+                "fontColor": {
+                  "light": "#D43535"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Spaces Created Last 7 Days"
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "f26a9e4b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "3aafab7e",
+                  "fields": [
+                    {
+                      "name": "total_spaces",
+                      "expression": "`total_spaces`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_spaces"
+                }
+              },
+              "style": {
+                "fontColor": {
+                  "light": "#E21C88"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Spaces Cloned Last 7 Days"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "events-per-day",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "475664bf",
+                  "fields": [
+                    {
+                      "name": "action_name",
+                      "expression": "`action_name`"
+                    },
+                    {
+                      "name": "daily(event_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)"
+                    },
+                    {
+                      "name": "event_count",
+                      "expression": "`event_count`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "event_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "action_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                },
+                "extra": [
+                  {
+                    "fieldName": "action_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Events Per Day"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "most-popular-spaces",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "52c4bb06",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "user_count",
+                      "expression": "`user_count`"
+                    },
+                    {
+                      "name": "popularity_rank",
+                      "expression": "`popularity_rank`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "title",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "title",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "user_count",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "user_count",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "popularity_rank",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "popularity_rank",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "space_id",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100000,
+                  "title": "space_id",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Most Popular Spaces"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "genie-space",
+            "queries": [
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b96a53b517eb96a93a7f0712c23c_title",
+                "query": {
+                  "datasetName": "c3fe56c2",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "title_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed153fbdb9959988b80e67_title",
+                "query": {
+                  "datasetName": "07fef115",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "title_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed157492ccbe8f1512703f_title",
+                "query": {
+                  "datasetName": "3dd860a4",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "title_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed157fbfb3abc29497520e_title",
+                "query": {
+                  "datasetName": "6d91761f",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "title_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed1591832b9935e918878b_title",
+                "query": {
+                  "datasetName": "fa86c0dd",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "expression": "`title`"
+                    },
+                    {
+                      "name": "title_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "title",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b96a53b517eb96a93a7f0712c23c_title"
+                  },
+                  {
+                    "fieldName": "title",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed153fbdb9959988b80e67_title"
+                  },
+                  {
+                    "fieldName": "title",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed157492ccbe8f1512703f_title"
+                  },
+                  {
+                    "fieldName": "title",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed157fbfb3abc29497520e_title"
+                  },
+                  {
+                    "fieldName": "title",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed1591832b9935e918878b_title"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Genie Space Name"
+              },
+              "disallowAll": false
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "d6145c79",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Filter Metrics for each Genie Space"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 6,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "02d72636",
+      "displayName": "Global Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    },
+    {
+      "name": "7c5b4d46",
+      "displayName": "Billing",
+      "layout": [
+        {
+          "widget": {
+            "name": "bb7b9c19",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9383c62e",
+                  "fields": [
+                    {
+                      "name": "sum(total_cost_usd)",
+                      "expression": "SUM(`total_cost_usd`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_cost_usd)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Cost for last 30days"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "de4511f3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9383c62e",
+                  "fields": [
+                    {
+                      "name": "daily(usage_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `usage_date`)"
+                    },
+                    {
+                      "name": "sum(total_cost_usd)",
+                      "expression": "SUM(`total_cost_usd`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(usage_date)",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Date"
+                },
+                "y": {
+                  "fieldName": "sum(total_cost_usd)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Tota Cost - USD"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Daily cost for last 30 days"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 1,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "warehouse-id",
+            "queries": [
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b9727a3f19bda6dce5f97bd3ff29_warehouse_name",
+                "query": {
+                  "datasetName": "a6c0ba1f",
+                  "fields": [
+                    {
+                      "name": "warehouse_name",
+                      "expression": "`warehouse_name`"
+                    },
+                    {
+                      "name": "warehouse_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed159e9970cd115e93ff80_warehouse_name",
+                "query": {
+                  "datasetName": "9383c62e",
+                  "fields": [
+                    {
+                      "name": "warehouse_name",
+                      "expression": "`warehouse_name`"
+                    },
+                    {
+                      "name": "warehouse_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "warehouse_name",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b9727a3f19bda6dce5f97bd3ff29_warehouse_name"
+                  },
+                  {
+                    "fieldName": "warehouse_name",
+                    "queryName": "dashboards/01f0b85262ec1f2997bf66c30d1f0417/datasets/01f0b85262ed159e9970cd115e93ff80_warehouse_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Warehouse ID"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "genieSpace": {
+      "isEnabled": false
+    }
+  }
+}
