@@ -40,7 +40,6 @@ SCHEMA  = dbutils.widgets.get("schema").strip()
 SPACES_TABLE = f"{CATALOG}.{SCHEMA}.genie_spaces"
 CONV_TABLE   = f"{CATALOG}.{SCHEMA}.genie_conversations"
 MSG_TABLE    = f"{CATALOG}.{SCHEMA}.genie_messages"
-USERS_TABLE  = f"{CATALOG}.{SCHEMA}.users_dim"
 
 PAGE_SIZE = 100
 THROTTLE_S = 0.15  # polite pacing to avoid 429s
@@ -132,13 +131,13 @@ WHEN NOT MATCHED THEN INSERT *
 all_convs = []
 
 # space id's for testing. Remove for PROD
-# space_ids = [
-#     {"space_id": "01f08d8be94b1fec8bde6037d5eaf022"},
-#     {"space_id": "01f0892583d31d2da542584ff87dcf62"},
-#     {"space_id": "01f08799e3b3163984675dd16cd34c8e"},
-# ]
+space_ids = [
+    {"space_id": "01f08d8be94b1fec8bde6037d5eaf022"},
+    {"space_id": "01f0892583d31d2da542584ff87dcf62"},
+    {"space_id": "01f08799e3b3163984675dd16cd34c8e"},
+]
 
-for s in spaces: # replace space_ids with spaces for PROD
+for s in space_ids: # replace spaces with space_ids for TEST
     sid = s.get("space_id")
     if not sid: 
         continue
@@ -227,7 +226,7 @@ messages_flat = (
     .withColumn("content", F.get_json_object("payload_json", "$.content"))
     .select(
         "space_id","conversation_id","message_id","author_id",
-        "created_timestamp", "last_updated_timestamp", "content", "ingested_at"
+        "created_timestamp", "last_updated_timestamp", "content", "ingested_at", "payload_json"
     )
     .dropna(subset=["message_id"])
     .dropDuplicates(["message_id"])
@@ -281,6 +280,7 @@ df_enriched = (
         "last_updated_timestamp",
         "content",
         "ingested_at",
+        "payload_json"
     )
 )
 
@@ -296,7 +296,8 @@ CREATE TABLE IF NOT EXISTS {MSG_TABLE} (
   created_timestamp TIMESTAMP,
   last_updated_timestamp TIMESTAMP,
   content STRING,
-  ingested_at TIMESTAMP
+  ingested_at TIMESTAMP,
+  payload_json STRING
 ) USING DELTA
 PARTITIONED BY (space_id)
 """
