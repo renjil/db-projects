@@ -1,4 +1,24 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC
+# MAGIC # Genie Space Usage Metrics Ingestion
+# MAGIC
+# MAGIC Run this notebook to ingest data from Databricks APIs.
+# MAGIC Data being ingested are:
+# MAGIC - Genie Space details - [ListSpaces](https://docs.databricks.com/api/workspace/genie/listspaces)
+# MAGIC - Conversations per Space - [ListConversations](https://docs.databricks.com/api/workspace/genie/listconversations)
+# MAGIC - Messages per space - [ListConversationsMessages](https://docs.databricks.com/api/workspace/genie/listconversationmessages)
+# MAGIC
+# MAGIC This notebook also creates Gold Tables for dashboard consumption.
+# MAGIC
+# MAGIC The Dashboard Genie Usage Analytics also makes use of data from [System Tables Audit events](https://docs.databricks.com/aws/en/admin/account-settings/audit-logs#aibi-genie-events).
+# MAGIC
+# MAGIC You can extend and adopt the metrics either using data from the API or System Tables.
+# MAGIC
+# MAGIC
+
+# COMMAND ----------
+
 # DBTITLE 1,User to specify catalog and schema for storing data
 dbutils.widgets.text("catalog", "renjiharold_demo", "Catalog")
 dbutils.widgets.text("schema", "genie_analytics", "Schema")
