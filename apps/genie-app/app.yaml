@@ -1,0 +1,7 @@
+command:
+  - streamlit
+  - run
+  - app.py
+env:
+  - name: SPACE_ID
+    value: "01f08d8be94b1fec8bde6037d5eaf022"
