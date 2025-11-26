@@ -1,0 +1,8 @@
+command:
+  - streamlit
+  - run
+  - app.py
+  - --server.enableXsrfProtection=false
+# Note: Lakebase connection credentials are obtained automatically via WorkspaceClient()
+# No additional secrets needed for Lakebase authentication
+
