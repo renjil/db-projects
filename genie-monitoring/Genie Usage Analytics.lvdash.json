@@ -202,7 +202,7 @@
         "    AVG(dau) AS avg_dau_last_7_days\n",
         "FROM (\n",
         "    SELECT dau\n",
-        "    FROM renjiharold_demo.genie_analytics.g_dau_by_messages_90d\n",
+        "    FROM renjiharold_demo.genie_analytics.\n",
         "    ORDER BY day DESC\n",
         "    LIMIT 7\n",
         ")"
@@ -1886,7 +1886,9 @@
       "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
     },
     "genieSpace": {
-      "isEnabled": false
-    }
+      "isEnabled": true,
+      "enablementMode": "ENABLED"
+    },
+    "applyModeEnabled": false
   }
 }
