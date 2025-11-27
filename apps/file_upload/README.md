@@ -301,11 +301,11 @@ w = WorkspaceClient(
 ```yaml
 env:
   - name: DATABRICKS_HOST
-    value: "{{secrets/rh-demo/databricks-host}}"
+    valueFrom: "{{secrets/rh-demo/databricks-host}}"
   - name: SP_CLIENT_ID
-    value: "{{secrets/rh-demo/sp-client-id}}"
+    valueFrom: "{{secrets/rh-demo/sp-client-id}}"
   - name: SP_CLIENT_SECRET
-    value: "{{secrets/rh-demo/sp-client-secret}}"
+    valueFrom: "{{secrets/rh-demo/sp-client-secret}}"
 ```
 
 **All credentials are securely stored in Databricks secrets!** ✅
