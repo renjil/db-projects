@@ -8,9 +8,9 @@ SP_CLIENT_SECRET = os.getenv("SP_CLIENT_SECRET")
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST")
 
 w = WorkspaceClient(
-    host="https://e2-demo-field-eng.cloud.databricks.com",
-    client_id="43d91404-054d-4e45-800a-7dc30da01a9e",
-    client_secret="dosea74b304b76a9ba9e95000e4cac8b55fa"
+    host=DATABRICKS_HOST,
+    client_id=SP_CLIENT_ID,
+    client_secret=SP_CLIENT_SECRET
 )
 
 st.title("File Upload to Unity Catalog Volume")
