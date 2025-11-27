@@ -313,15 +313,15 @@ env:
 ## Improvements & Enhancements
 
 ### Suggested Improvements
-2. **Add File Size Display** - Show uploaded file size
-3. **Multiple File Upload** - Allow batch uploads
-4. **Progress Bar** - Show upload progress for large files
-5. **File Preview** - Preview CSV/JSON before upload
-6. **Upload History** - Show recently uploaded files
-7. **Folder Creation** - Create subdirectories in volumes
-8. **File Listing** - Browse existing files in volumes
-9. **File Deletion** - Remove uploaded files
-10. **Metadata Tags** - Add custom metadata to uploads
+1. **Add File Size Display** - Show uploaded file size
+2. **Multiple File Upload** - Allow batch uploads
+3. **Progress Bar** - Show upload progress for large files
+4. **File Preview** - Preview CSV/JSON before upload
+5. **Upload History** - Show recently uploaded files
+6. **Folder Creation** - Create subdirectories in volumes
+7. **File Listing** - Browse existing files in volumes
+8. **File Deletion** - Remove uploaded files
+9. **Metadata Tags** - Add custom metadata to uploads
 
 ### Potential Features
 
