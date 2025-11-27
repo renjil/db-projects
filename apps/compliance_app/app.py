@@ -24,7 +24,7 @@ INSTANCE_NAME = "chat-db"        # Lakebase instance name
 DATABASE = "compliance_app"       # PostgreSQL database name
 SCHEMA = "audit"                  # PostgreSQL schema name
 TABLE = "document_registry"       # Table name
-POSTGRES_USER = "06c27421-2fda-44bc-8891-bd83bb09e08c"  # Service principal ID for Databricks App
+POSTGRES_USER = "06c27421-2fda-44bc-8891-bd83bb09e08c"  # Update with your Service principal ID for Databricks App
 TABLE_FULL_NAME = f"{SCHEMA}.{TABLE}"
 
 # Page configuration

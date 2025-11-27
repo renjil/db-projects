@@ -36,10 +36,9 @@ A comprehensive Databricks application for tracking and managing documents uploa
 
 ## Table Schema
 
-The application uses a PostgreSQL table accessed via Databricks Lakehouse Federation:
-- **Full Path**: `` `chat-db`.`compliance_app`.`audit`.`document_registry` ``
+The application uses a PostgreSQL table accessed via Databricks Lakebase:
 - **Storage**: PostgreSQL database
-- **Access Method**: Lakehouse Federation
+- **Access Method**: psyocpg2
 
 ### Key Attributes:
 - **Document Info**: ID, name, type, size
@@ -50,7 +49,9 @@ The application uses a PostgreSQL table accessed via Databricks Lakehouse Federa
 
 ## Setup Instructions
 
-### 1. Create the Table and Populate Data
+### 1. Create a Lakebase database instance following these [instructions](https://docs.databricks.com/aws/en/oltp/instances/create/).
+
+### 2. Create the Table and Populate Data
 
 Run the one-time setup script located in the `Setup` folder. See `Setup/README.md` for detailed instructions.
 
@@ -62,7 +63,7 @@ In a Databricks notebook:
 ```
 
 This will:
-- Create the schema `main.banking_compliance`
+- Create the schema `audit`
 - Create the table `document_registry`
 - Populate with 500 sample documents
 
@@ -73,16 +74,14 @@ For more setup options and troubleshooting, see the [Setup README](Setup/README.
 Update the following in `app.py`:
 
 ```python
-WAREHOUSE_ID = "your-sql-warehouse-id"  # Your SQL warehouse ID
-
-# These should already be configured correctly:
+# These should already be configured correctly. Replace with your specific database details:
 LAKEHOUSE_INSTANCE = "chat-db"
 DATABASE = "compliance_app"
 SCHEMA = "audit"
 TABLE = "document_registry"
 ```
 
-Ensure your Lakehouse Federation connection `chat-db` is configured in Databricks and accessible from your app.
+Ensure your Lakebase connection `chat-db` is configured in Databricks and accessible from your app.
 
 ### 3. Set Up Secrets
 
@@ -162,14 +161,14 @@ ORDER BY storage_gb DESC;
 
 ## Technology Stack
 
-- **Databricks Lakehouse Federation**: Access PostgreSQL data through Databricks
+- **Databricks Lakebase**: Access PostgreSQL data through Databricks
 - **PostgreSQL**: Reliable relational database for document metadata
 - **Streamlit**: Interactive web interface
 - **Plotly**: Interactive visualizations
 - **Databricks SDK**: SQL execution and workspace integration
 - **PySpark**: Data processing and table operations
 
-## Benefits of Using Databricks Lakehouse Federation
+## Benefits of Using Databricks Lakebase
 
 1. **Single Source of Truth**: All document metadata in governed PostgreSQL database
 2. **Unified Access**: Query PostgreSQL alongside other data sources in Databricks
@@ -191,9 +190,10 @@ ORDER BY storage_gb DESC;
 - **Access Logs**: Monitor who accessed which documents
 - **Approval Workflows**: Multi-level document approval process
 
-## Support
+## Disclaimer
 
-For questions or issues, contact your Databricks administrator or compliance team.
+This is not an official Databricks solution. Please test and validate before using it in Prod.
+For questions or issues, contact your Databricks account team.
 
 ---
 
