@@ -24,7 +24,7 @@
 
 # Configuration
 SECRET_SCOPE = "rh-demo"
-DATABRICKS_HOST = "https://e2-demo-field-eng.cloud.databricks.com"
+DATABRICKS_HOST = "https://xxx.cloud.databricks.com"
 
 # Service Principal Credentials
 # Option 1: Set these directly (not recommended for production)
@@ -257,4 +257,4 @@ except Exception as e:
 # MAGIC - Rotate secrets regularly
 # MAGIC - Use separate scopes for different environments
 # MAGIC - Grant minimal permissions to service principals
-
+# MAGIC

@@ -4,8 +4,8 @@ command:
   - app.py
 env:
   - name: DATABRICKS_HOST
-    value: "{{secrets/rh-demo/databricks-host}}"
+    valueFrom: databricks-host
   - name: SP_CLIENT_ID
-    value: "{{secrets/rh-demo/sp-client-id}}"
+    valueFrom: sp-client-id
   - name: SP_CLIENT_SECRET
-    value: "{{secrets/rh-demo/sp-client-secret}}"
+    valueFrom: sp-client-secret
