@@ -313,8 +313,6 @@ env:
 ## Improvements & Enhancements
 
 ### Suggested Improvements
-
-1. **Remove Hardcoded Credentials** (Critical)
 2. **Add File Size Display** - Show uploaded file size
 3. **Multiple File Upload** - Allow batch uploads
 4. **Progress Bar** - Show upload progress for large files
