@@ -5,7 +5,7 @@ This folder contains the one-time setup script to create and populate the Postgr
 ## Prerequisites
 
 - Access to a Databricks workspace
-- Lakehouse Federation connection configured for PostgreSQL (connection name: `chat-db`)
+- Lakebase connection configured for PostgreSQL (connection name: `chat-db`)
 - Permissions to create schemas and tables in the PostgreSQL database
 - PySpark environment (available in Databricks notebooks or jobs)
 - PostgreSQL database instance accessible from Databricks
@@ -77,20 +77,14 @@ TABLE = "document_registry"          # Your table name
 num_records = 500                    # Change number of sample records
 ```
 
-## Lakehouse Federation Setup
+## Lakebase Setup
 
-Before running the setup script, ensure you have configured a Lakehouse Federation connection in Databricks:
+Before running the setup script, ensure you have configured a Lakebase instance in Databricks:
 
-1. Go to **Catalog** in Databricks workspace
-2. Click **Add** > **Add a connection**
-3. Select **PostgreSQL**
-4. Configure connection with:
-   - **Connection Name**: `chat-db`
-   - **Host**: Your PostgreSQL host
-   - **Port**: 5432 (or your custom port)
-   - **Database**: `compliance_app`
-   - **Username/Password**: Your PostgreSQL credentials
-5. Test the connection and save
+1. Go to **Compute** in Databricks workspace
+2. Navigate to **Lakebase Postgres**
+3. Click **Create database** > **Configure details**
+4. Click Save
 
 ## Verification
 
@@ -98,13 +92,13 @@ After running the setup, verify the table was created successfully:
 
 ```sql
 -- Check table exists
-DESCRIBE TABLE `chat-db`.`compliance_app`.`audit`.`document_registry`;
+DESCRIBE TABLE `compliance_app`.`audit`.`document_registry`;
 
 -- View sample data
-SELECT * FROM `chat-db`.`compliance_app`.`audit`.`document_registry` LIMIT 10;
+SELECT * FROM `compliance_app`.`audit`.`document_registry` LIMIT 10;
 
 -- Check record count
-SELECT COUNT(*) FROM `chat-db`.`compliance_app`.`audit`.`document_registry`;
+SELECT COUNT(*) FROM `compliance_app`.`audit`.`document_registry`;
 ```
 
 ## Re-running Setup
@@ -118,18 +112,16 @@ The script drops and recreates the table, so re-running will:
 ## Next Steps
 
 After successful setup:
-1. Verify the table exists: `` `chat-db`.`compliance_app`.`audit`.`document_registry` ``
-2. Update `WAREHOUSE_ID` in `../app.py` (if not already set)
-3. Ensure Lakehouse Federation connection is available to the app
+1. Verify the table exists: `` `compliance_app`.`audit`.`document_registry` ``
+3. Ensure Lakebase connection is available to the app
 4. Deploy the Streamlit app
 5. Access the compliance dashboard
 
 ## Troubleshooting
 
 **Connection Errors:**
-- Verify Lakehouse Federation connection `chat-db` is configured
+- Verify Lakebaseconnection `chat-db` is created and in Ready State
 - Test the connection in Databricks UI
-- Ensure PostgreSQL database is accessible from Databricks
 
 **Permission Errors:**
 - Ensure you have CREATE permissions on the PostgreSQL database
@@ -146,11 +138,6 @@ After successful setup:
 - Check for error messages in the output
 - Verify table exists: `SELECT * FROM \`chat-db\`.\`compliance_app\`.\`audit\`.\`document_registry\` LIMIT 1`
 - Check PostgreSQL logs for any issues
-
-**Lakehouse Federation Issues:**
-- Ensure Databricks runtime supports Lakehouse Federation
-- Verify network connectivity between Databricks and PostgreSQL
-- Check firewall rules allow connections from Databricks
 
 ---
 
