@@ -143,3 +143,8 @@ After successful setup:
 
 **Note**: This setup only needs to be run once. The data will persist in the PostgreSQL database and can be queried by the app through Lakehouse Federation indefinitely.
 
+## Disclaimer
+
+This is not an official Databricks solution. Please test and validate before using it in Prod.
+For questions or issues, contact your Databricks account team.
+
