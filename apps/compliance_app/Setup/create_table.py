@@ -15,11 +15,11 @@ from datetime import datetime, timedelta
 import random
 
 # Lakebase Configuration
-INSTANCE_NAME = "chat-db"       # Lakebase instance name
-DATABASE = "compliance_app"      # PostgreSQL database name  
+INSTANCE_NAME = "fe-shared-demo"       # Lakebase instance name
+DATABASE = "rh_compliance_app"      # PostgreSQL database name  
 SCHEMA = "audit"                 # PostgreSQL schema name
 TABLE = "document_registry"      # Table name
-POSTGRES_USER = "06c27421-2fda-44bc-8891-bd83bb09e08c"  # Update with yourService principal ID for Databricks App
+POSTGRES_USER = "renji.harold@databricks.com"  # Update with yourService principal ID for Databricks App
 
 # Initialize Databricks Workspace Client
 w = WorkspaceClient()

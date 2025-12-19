@@ -19,8 +19,8 @@ import uuid
 w = WorkspaceClient()
 
 # Lakebase Configuration
-INSTANCE_NAME = "chat-db"        # Lakebase instance name
-DATABASE = "compliance_app"       # PostgreSQL database name
+INSTANCE_NAME = "fe-shared-demo"        # Lakebase instance name
+DATABASE = "rh_compliance_app"       # PostgreSQL database name
 SCHEMA = "audit"                  # PostgreSQL schema name
 TABLE = "document_registry"       # Table name
 POSTGRES_USER = "06c27421-2fda-44bc-8891-bd83bb09e08c"  # Update with your Service principal ID for Databricks App
@@ -163,7 +163,7 @@ with st.sidebar:
     refresh_data = st.button("🔄 Refresh Data", type="primary", use_container_width=True)
 
 # Build WHERE clause based on filters
-where_clauses = [f"upload_date >= current_date() - INTERVAL {days_back} DAYS"]
+where_clauses = [f"upload_date >= CURRENT_DATE - INTERVAL '{days_back} days'"]
 
 if "All" not in selected_bu and selected_bu:
     bu_list = "','".join(selected_bu)
@@ -197,7 +197,7 @@ with tab1:
         SUM(file_size_mb) as total_storage_mb,
         COUNT(CASE WHEN marked_for_archival THEN 1 END) as archival_pending,
         COUNT(CASE WHEN compliance_status = 'Non-Compliant' THEN 1 END) as non_compliant,
-        COUNT(CASE WHEN review_required AND next_review_date <= current_date() + INTERVAL 30 DAYS THEN 1 END) as reviews_due_soon,
+        COUNT(CASE WHEN review_required AND next_review_date <= CURRENT_DATE + INTERVAL '30 days' THEN 1 END) as reviews_due_soon,
         COUNT(CASE WHEN classification IN ('Confidential', 'Highly Confidential') THEN 1 END) as sensitive_docs
     FROM {TABLE_FULL_NAME}
     WHERE {where_clause}
@@ -576,7 +576,7 @@ with tab4:
             next_review_date
         FROM {TABLE_FULL_NAME}
         WHERE review_required = true
-            AND next_review_date <= current_date() + INTERVAL 30 DAYS
+            AND next_review_date <= CURRENT_DATE + INTERVAL '30 days'
             AND {where_clause}
         ORDER BY next_review_date ASC
         LIMIT 50
@@ -604,7 +604,7 @@ with tab4:
         file_size_mb
     FROM {TABLE_FULL_NAME}
     WHERE marked_for_archival = true
-        AND archival_date <= current_date() + INTERVAL 90 DAYS
+        AND archival_date <= CURRENT_DATE + INTERVAL '90 days'
         AND {where_clause}
     ORDER BY archival_date ASC
     LIMIT 100
