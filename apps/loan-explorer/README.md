@@ -1,6 +1,6 @@
 # 🏦 Loan Explorer
 
-A Databricks App for searching, viewing, and managing loan applications with contract document downloads.
+A Databricks App for searching, viewing, and managing loan applications along with functionality to download contract documents.
 
 ## Features
 
