@@ -1,3 +1,5 @@
+USE CATALOG renjiharold_demo;
+USE SCHEMA superfund_membership;
 -- =============================================================================
 -- Super Fund Membership - Metric View Definition
 -- =============================================================================
@@ -17,7 +19,7 @@
 -- This metric view uses a SQL query as source to join relevant tables and
 -- provide a comprehensive view of member contributions, balances, and demographics.
 
-CREATE OR REPLACE VIEW superfund_membership_metrics
+CREATE OR REPLACE VIEW membership_metrics
 WITH METRICS
 LANGUAGE YAML
 AS $$
@@ -249,7 +251,7 @@ $$;
 -- -----------------------------------------------------------------------------
 -- Additional Metric View: Fee Analysis
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW superfund_fee_metrics
+CREATE OR REPLACE VIEW fee_metrics
 WITH METRICS
 LANGUAGE YAML
 AS $$
@@ -347,7 +349,7 @@ $$;
 -- -----------------------------------------------------------------------------
 -- Additional Metric View: Withdrawal Analysis  
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW superfund_withdrawal_metrics
+CREATE OR REPLACE VIEW withdrawal_metrics
 WITH METRICS
 LANGUAGE YAML
 AS $$

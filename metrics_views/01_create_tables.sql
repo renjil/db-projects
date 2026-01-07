@@ -1,3 +1,5 @@
+USE CATALOG renjiharold_demo;
+USE SCHEMA superfund_membership;
 -- =============================================================================
 -- Super Fund Membership Data Model
 -- =============================================================================
