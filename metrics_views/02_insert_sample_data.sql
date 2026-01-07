@@ -369,11 +369,14 @@ SELECT
     'Investment' as fee_type,
     TO_DATE('2024-06-30') as fee_date,
     'FY2024' as financial_year,
-    ROUND(
-        (SELECT SUM(mi.current_balance) FROM member_investments mi WHERE mi.member_id = m.member_id) * 0.005, 2
-    ) as amount,
+    ROUND(COALESCE(mb.total_balance, 0) * 0.005, 2) as amount,
     'Annual investment management fee' as description,
     CURRENT_TIMESTAMP() as created_at
 FROM members m
+LEFT JOIN (
+    SELECT member_id, SUM(current_balance) as total_balance 
+    FROM member_investments 
+    GROUP BY member_id
+) mb ON m.member_id = mb.member_id
 WHERE m.membership_status = 'Active';
 
