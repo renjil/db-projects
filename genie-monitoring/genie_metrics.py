@@ -415,3 +415,21 @@ display(spark.table(MSG_TABLE).orderBy(F.desc("created_timestamp")).limit(20))
 # MAGIC WHERE c.created_timestamp >= DATEADD(day, -30, CURRENT_TIMESTAMP())
 # MAGIC GROUP BY 1,2,3
 # MAGIC ORDER BY 1;
+
+# COMMAND ----------
+
+# DBTITLE 1,Daily Active Users (last 30d)
+# MAGIC %sql
+# MAGIC -- Daily Active Users (last 30d)
+# MAGIC CREATE OR REPLACE TABLE ${catalog}.${schema}.g_dau_by_messages_30d AS
+# MAGIC SELECT
+# MAGIC   DATE_TRUNC('day', m.created_timestamp) AS day,
+# MAGIC   COUNT(DISTINCT m.author_id) AS dau
+# MAGIC FROM ${catalog}.${schema}.genie_messages m
+# MAGIC WHERE m.created_timestamp >= DATEADD(day, -30, CURRENT_TIMESTAMP())
+# MAGIC GROUP BY 1
+# MAGIC ORDER BY 1;
+
+# COMMAND ----------
+
+

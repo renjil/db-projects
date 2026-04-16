@@ -202,7 +202,7 @@
         "    AVG(dau) AS avg_dau_last_7_days\n",
         "FROM (\n",
         "    SELECT dau\n",
-        "    FROM renjiharold_demo.genie_analytics.\n",
+        "    FROM renjiharold_demo.genie_analytics.g_dau_by_messages_30d\n",
         "    ORDER BY day DESC\n",
         "    LIMIT 7\n",
         ")"
