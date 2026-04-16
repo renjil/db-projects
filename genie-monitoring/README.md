@@ -2,6 +2,8 @@
 
 A comprehensive monitoring solution for tracking usage, engagement, and costs across Databricks AI/BI Genie Spaces.
 
+![Genie Usage Analytics dashboard: KPIs, events per day, conversation ratings, popular spaces, and review requests](genie-usage-analytics-dashboard.png)
+
 ## Overview
 
 This project provides:
