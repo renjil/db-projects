@@ -1,0 +1,858 @@
+{
+  "pages": [
+    {
+      "name": "daily-snapshot",
+      "displayName": "Daily Snapshot",
+      "layout": [
+        {
+          "widget": {
+            "name": "today_sales",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "today_sales", "expression": "SUM(`today_sales`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "today_sales", "displayName": "Today's Sales"},
+                "format": {"type": "currency", "currency": "AUD", "precision": 0}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "today_gp",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "today_gp", "expression": "SUM(`today_gp`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "today_gp", "displayName": "Today's GP"},
+                "format": {"type": "currency", "currency": "AUD", "precision": 0}
+              }
+            }
+          },
+          "position": {"x": 3, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "today_margin",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "today_gp_margin_pct", "expression": "AVG(`today_gp_margin_pct`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "today_gp_margin_pct", "displayName": "GP Margin %"},
+                "format": {"type": "percent", "precision": 1}
+              }
+            }
+          },
+          "position": {"x": 6, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "vs_budget",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "today_vs_budget_pct", "expression": "AVG(`today_vs_budget_pct`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "today_vs_budget_pct", "displayName": "vs Budget %"},
+                "format": {"type": "percent", "precision": 1},
+                "comparison": {"baseline": 0}
+              }
+            }
+          },
+          "position": {"x": 9, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "sales_trend_7d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_trend",
+                  "fields": [
+                    {"name": "summary_date", "expression": "`summary_date`"},
+                    {"name": "total_sales", "expression": "SUM(`total_sales`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "summary_date", "scale": {"type": "temporal"}, "displayName": "Date"},
+                "y": {"fieldName": "total_sales", "scale": {"type": "quantitative"}, "displayName": "Sales ($)"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 2, "width": 8, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "top_categories",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "category_sales",
+                  "fields": [
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "total_sales", "expression": "SUM(`total_sales`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "total_sales", "scale": {"type": "quantitative"}, "displayName": "Sales ($)"},
+                "y": {"fieldName": "category_name", "scale": {"type": "categorical"}, "displayName": "Category", "sort": "-x"}
+              }
+            }
+          },
+          "position": {"x": 8, "y": 2, "width": 4, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "vs_cluster_gauge",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "today_vs_cluster_pct", "expression": "AVG(`today_vs_cluster_pct`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "today_vs_cluster_pct", "displayName": "vs Cluster %"},
+                "format": {"type": "percent", "precision": 1},
+                "comparison": {"baseline": 0}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 6, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "l28d_yoy",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "l28d_avg_yoy_growth", "expression": "AVG(`l28d_avg_yoy_growth`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "l28d_avg_yoy_growth", "displayName": "28-Day YoY Growth"},
+                "format": {"type": "percent", "precision": 1},
+                "comparison": {"baseline": 0}
+              }
+            }
+          },
+          "position": {"x": 3, "y": 6, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "l28d_avg_daily",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "l28d_avg_daily_sales", "expression": "AVG(`l28d_avg_daily_sales`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "l28d_avg_daily_sales", "displayName": "28-Day Avg Daily Sales"},
+                "format": {"type": "currency", "currency": "AUD", "precision": 0}
+              }
+            }
+          },
+          "position": {"x": 6, "y": 6, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "l28d_margin",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_kpis",
+                  "fields": [
+                    {"name": "l28d_avg_gp_margin_pct", "expression": "AVG(`l28d_avg_gp_margin_pct`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "l28d_avg_gp_margin_pct", "displayName": "28-Day Avg GP Margin"},
+                "format": {"type": "percent", "precision": 1}
+              }
+            }
+          },
+          "position": {"x": 9, "y": 6, "width": 3, "height": 2}
+        }
+      ]
+    },
+    {
+      "name": "category-performance",
+      "displayName": "Category Performance",
+      "layout": [
+        {
+          "widget": {
+            "name": "category_filter",
+            "queries": [
+              {
+                "name": "filter_query",
+                "query": {
+                  "datasetName": "categories",
+                  "fields": [
+                    {"name": "category_name", "expression": "DISTINCT `category_name`"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "field": {"fieldName": "category_name", "displayName": "Category"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 3, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "sales_by_category_pie",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "category_performance",
+                  "fields": [
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "total_sales", "expression": "SUM(`total_sales`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {"fieldName": "total_sales", "displayName": "Sales ($)"},
+                "color": {"fieldName": "category_name", "displayName": "Category"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "yoy_growth_by_category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "category_performance",
+                  "fields": [
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "yoy_sales_growth", "expression": "AVG(`yoy_sales_growth`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "yoy_sales_growth", "scale": {"type": "quantitative"}, "displayName": "YoY Growth %"},
+                "y": {"fieldName": "category_name", "scale": {"type": "categorical"}, "displayName": "Category", "sort": "-x"},
+                "color": {"fieldName": "yoy_sales_growth", "scale": {"type": "quantitative"}}
+              }
+            }
+          },
+          "position": {"x": 6, "y": 1, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "gp_vs_sales_scatter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "category_performance",
+                  "fields": [
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "yoy_sales_growth", "expression": "AVG(`yoy_sales_growth`)"},
+                    {"name": "yoy_gp_growth", "expression": "AVG(`yoy_gp_growth`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {"fieldName": "yoy_sales_growth", "scale": {"type": "quantitative"}, "displayName": "Sales Growth %"},
+                "y": {"fieldName": "yoy_gp_growth", "scale": {"type": "quantitative"}, "displayName": "GP Growth %"},
+                "color": {"fieldName": "category_name", "displayName": "Category"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 5, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "cluster_comparison_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "category_performance",
+                  "fields": [
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "total_sales", "expression": "SUM(`total_sales`)"},
+                    {"name": "cluster_avg_sales", "expression": "AVG(`cluster_avg_sales`)"},
+                    {"name": "vs_cluster_sales_pct", "expression": "AVG(`vs_cluster_sales_pct`)"},
+                    {"name": "is_decline_outlier", "expression": "MAX(CAST(`is_decline_outlier` AS INT))"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "category_name", "displayName": "Category"},
+                  {"fieldName": "total_sales", "displayName": "Sales ($)", "format": {"type": "currency", "currency": "AUD", "precision": 0}},
+                  {"fieldName": "cluster_avg_sales", "displayName": "Cluster Avg", "format": {"type": "currency", "currency": "AUD", "precision": 0}},
+                  {"fieldName": "vs_cluster_sales_pct", "displayName": "vs Cluster %", "format": {"type": "percent", "precision": 1}},
+                  {"fieldName": "is_decline_outlier", "displayName": "Alert"}
+                ]
+              }
+            }
+          },
+          "position": {"x": 6, "y": 5, "width": 6, "height": 4}
+        }
+      ]
+    },
+    {
+      "name": "inventory-health",
+      "displayName": "Inventory Health",
+      "layout": [
+        {
+          "widget": {
+            "name": "oos_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_summary",
+                  "fields": [
+                    {"name": "oos_tailored_count", "expression": "SUM(`oos_tailored_count`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "oos_tailored_count", "displayName": "Out of Stock Items"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "projected_oos_3d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_summary",
+                  "fields": [
+                    {"name": "projected_oos_3d_count", "expression": "SUM(`projected_oos_3d_count`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "projected_oos_3d_count", "displayName": "OOS in 3 Days"}
+              }
+            }
+          },
+          "position": {"x": 3, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "dead_stock_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_summary",
+                  "fields": [
+                    {"name": "dead_stock_count", "expression": "SUM(`dead_stock_count`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "dead_stock_count", "displayName": "Dead Stock Items"}
+              }
+            }
+          },
+          "position": {"x": 6, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "dead_stock_value",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_summary",
+                  "fields": [
+                    {"name": "dead_stock_value", "expression": "SUM(`dead_stock_value`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "dead_stock_value", "displayName": "Dead Stock Value"},
+                "format": {"type": "currency", "currency": "AUD", "precision": 0}
+              }
+            }
+          },
+          "position": {"x": 9, "y": 0, "width": 3, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "days_of_stock_histogram",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_health",
+                  "fields": [
+                    {"name": "days_of_stock_bucket", "expression": "CASE WHEN `days_of_stock` < 3 THEN '< 3 days' WHEN `days_of_stock` < 7 THEN '3-7 days' WHEN `days_of_stock` < 14 THEN '7-14 days' WHEN `days_of_stock` < 30 THEN '14-30 days' ELSE '30+ days' END"},
+                    {"name": "item_count", "expression": "COUNT(*)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "days_of_stock_bucket", "scale": {"type": "categorical"}, "displayName": "Days of Stock"},
+                "y": {"fieldName": "item_count", "scale": {"type": "quantitative"}, "displayName": "Item Count"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 2, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "projected_oos_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_health",
+                  "fields": [
+                    {"name": "article_name", "expression": "`article_name`"},
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "soh_qty", "expression": "`soh_qty`"},
+                    {"name": "days_until_oos", "expression": "`days_until_oos`"},
+                    {"name": "suggested_reorder_qty", "expression": "`suggested_reorder_qty`"}
+                  ],
+                  "disaggregated": true,
+                  "filters": [
+                    {"fieldName": "days_until_oos", "expression": "`days_until_oos` <= 7"}
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "article_name", "displayName": "Article"},
+                  {"fieldName": "category_name", "displayName": "Category"},
+                  {"fieldName": "soh_qty", "displayName": "SOH Qty"},
+                  {"fieldName": "days_until_oos", "displayName": "Days Until OOS"},
+                  {"fieldName": "suggested_reorder_qty", "displayName": "Reorder Qty"}
+                ]
+              }
+            }
+          },
+          "position": {"x": 6, "y": 2, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "overstock_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "inventory_health",
+                  "fields": [
+                    {"name": "article_name", "expression": "`article_name`"},
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "soh_qty", "expression": "`soh_qty`"},
+                    {"name": "soh_value", "expression": "`soh_value`"},
+                    {"name": "days_of_stock", "expression": "`days_of_stock`"}
+                  ],
+                  "disaggregated": true,
+                  "filters": [
+                    {"fieldName": "days_of_stock", "expression": "`days_of_stock` > 30"}
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "article_name", "displayName": "Article"},
+                  {"fieldName": "category_name", "displayName": "Category"},
+                  {"fieldName": "soh_qty", "displayName": "SOH Qty"},
+                  {"fieldName": "soh_value", "displayName": "SOH Value ($)", "format": {"type": "currency", "currency": "AUD", "precision": 0}},
+                  {"fieldName": "days_of_stock", "displayName": "Days of Stock"}
+                ]
+              }
+            }
+          },
+          "position": {"x": 0, "y": 6, "width": 12, "height": 4}
+        }
+      ]
+    },
+    {
+      "name": "write-off-analysis",
+      "displayName": "Write-Off Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "date_range_filter",
+            "queries": [
+              {
+                "name": "filter_query",
+                "query": {
+                  "datasetName": "writeoff_summary",
+                  "fields": [
+                    {"name": "writeoff_date", "expression": "`writeoff_date`"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "filter-date-range",
+              "encodings": {
+                "field": {"fieldName": "writeoff_date", "displayName": "Date Range"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 4, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "total_writeoff_value",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "writeoff_trends",
+                  "fields": [
+                    {"name": "l7d_writeoff_value", "expression": "SUM(`l7d_writeoff_value`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "l7d_writeoff_value", "displayName": "7-Day Write-off Value"},
+                "format": {"type": "currency", "currency": "AUD", "precision": 0}
+              }
+            }
+          },
+          "position": {"x": 4, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "anomaly_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "writeoff_trends",
+                  "fields": [
+                    {"name": "l7d_anomaly_count", "expression": "SUM(`l7d_anomaly_count`)"}
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "l7d_anomaly_count", "displayName": "Anomalies This Week"}
+              }
+            }
+          },
+          "position": {"x": 8, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "writeoff_by_category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "writeoff_summary",
+                  "fields": [
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "total_value", "expression": "SUM(`total_value`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "total_value", "scale": {"type": "quantitative"}, "displayName": "Value ($)"},
+                "y": {"fieldName": "category_name", "scale": {"type": "categorical"}, "displayName": "Category", "sort": "-x"}
+              }
+            }
+          },
+          "position": {"x": 0, "y": 2, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "daily_writeoff_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "writeoff_summary",
+                  "fields": [
+                    {"name": "writeoff_date", "expression": "`writeoff_date`"},
+                    {"name": "total_value", "expression": "SUM(`total_value`)"}
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "writeoff_date", "scale": {"type": "temporal"}, "displayName": "Date"},
+                "y": {"fieldName": "total_value", "scale": {"type": "quantitative"}, "displayName": "Value ($)"}
+              }
+            }
+          },
+          "position": {"x": 6, "y": 2, "width": 6, "height": 4}
+        },
+        {
+          "widget": {
+            "name": "anomalies_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "writeoff_summary",
+                  "fields": [
+                    {"name": "writeoff_date", "expression": "`writeoff_date`"},
+                    {"name": "category_name", "expression": "`category_name`"},
+                    {"name": "total_value", "expression": "`total_value`"},
+                    {"name": "cluster_avg_value", "expression": "`cluster_avg_value`"},
+                    {"name": "std_dev_from_cluster", "expression": "`std_dev_from_cluster`"},
+                    {"name": "anomaly_direction", "expression": "`anomaly_direction`"}
+                  ],
+                  "disaggregated": true,
+                  "filters": [
+                    {"fieldName": "is_anomaly", "expression": "`is_anomaly` = true"}
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "writeoff_date", "displayName": "Date"},
+                  {"fieldName": "category_name", "displayName": "Category"},
+                  {"fieldName": "total_value", "displayName": "Value ($)", "format": {"type": "currency", "currency": "AUD", "precision": 0}},
+                  {"fieldName": "cluster_avg_value", "displayName": "Cluster Avg", "format": {"type": "currency", "currency": "AUD", "precision": 0}},
+                  {"fieldName": "std_dev_from_cluster", "displayName": "Std Dev"},
+                  {"fieldName": "anomaly_direction", "displayName": "Direction"}
+                ]
+              }
+            }
+          },
+          "position": {"x": 0, "y": 6, "width": 12, "height": 4}
+        }
+      ]
+    }
+  ],
+  "datasets": [
+    {
+      "name": "daily_kpis",
+      "displayName": "Daily KPIs",
+      "query": "SELECT * FROM renjiharold_demo.store_demo.gold_store_kpi_summary"
+    },
+    {
+      "name": "sales_trend",
+      "displayName": "Sales Trend",
+      "query": "SELECT summary_date, SUM(total_sales) as total_sales, SUM(total_gp) as total_gp FROM renjiharold_demo.store_demo.gold_daily_store_summary WHERE summary_date >= CURRENT_DATE() - 7 GROUP BY summary_date ORDER BY summary_date"
+    },
+    {
+      "name": "category_sales",
+      "displayName": "Category Sales",
+      "query": "SELECT category_name, SUM(l28d_sales) as total_sales FROM renjiharold_demo.store_demo.gold_category_rankings GROUP BY category_name ORDER BY total_sales DESC LIMIT 10"
+    },
+    {
+      "name": "categories",
+      "displayName": "Categories",
+      "query": "SELECT DISTINCT category_name FROM renjiharold_demo.store_demo.gold_category_rankings ORDER BY category_name"
+    },
+    {
+      "name": "category_performance",
+      "displayName": "Category Performance",
+      "query": "SELECT * FROM renjiharold_demo.store_demo.gold_category_performance WHERE period_start >= CURRENT_DATE() - 28"
+    },
+    {
+      "name": "inventory_summary",
+      "displayName": "Inventory Summary",
+      "query": "SELECT * FROM renjiharold_demo.store_demo.gold_inventory_summary"
+    },
+    {
+      "name": "inventory_health",
+      "displayName": "Inventory Health",
+      "query": "SELECT * FROM renjiharold_demo.store_demo.gold_inventory_health WHERE is_tailored_in = TRUE"
+    },
+    {
+      "name": "writeoff_summary",
+      "displayName": "Write-off Summary",
+      "query": "SELECT * FROM renjiharold_demo.store_demo.gold_writeoff_summary WHERE writeoff_date >= CURRENT_DATE() - 28"
+    },
+    {
+      "name": "writeoff_trends",
+      "displayName": "Write-off Trends",
+      "query": "SELECT * FROM renjiharold_demo.store_demo.gold_writeoff_trends"
+    }
+  ]
+}

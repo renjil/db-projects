@@ -1,0 +1,49 @@
+resources:
+  jobs:
+    refresh_gold_layer:
+      name: "[${bundle.target}] 7-Eleven Gold Refresh"
+      description: "Daily refresh of Gold layer tables for 7-Eleven Store Intelligence"
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: Australia/Melbourne
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: run_gold_etl
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.gold_etl.id}
+            full_refresh: false
+      tags:
+        project: 7eleven-store-intelligence
+        team: field-engineering
+        environment: ${bundle.target}
+      permissions:
+        - level: CAN_VIEW
+          group_name: users
+        - level: CAN_MANAGE_RUN
+          group_name: users
+
+    setup_rls:
+      name: "[${bundle.target}] 7-Eleven RLS Setup"
+      description: "One-time setup of Row-Level Security"
+      tasks:
+        - task_key: run_rls_setup
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/sql/04_row_level_security.sql
+      tags:
+        project: 7eleven-store-intelligence
+        team: field-engineering
+
+    setup_cfo_views:
+      name: "[${bundle.target}] 7-Eleven CFO Views Setup"
+      description: "Create CFO Executive Dashboard SQL views"
+      tasks:
+        - task_key: create_cfo_views
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/sql/07_cfo_views.sql
+      tags:
+        project: 7eleven-store-intelligence
+        team: field-engineering

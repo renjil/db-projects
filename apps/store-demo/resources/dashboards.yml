@@ -1,0 +1,23 @@
+resources:
+  dashboards:
+    cfo_executive:
+      display_name: "[${bundle.target}] 7-Eleven CFO Executive Dashboard"
+      file_path: ../dashboard/cfo_executive.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      embed_credentials: true
+      permissions:
+        - level: CAN_READ
+          group_name: users
+        - level: CAN_EDIT
+          user_name: ${workspace.current_user.userName}
+
+    store_performance:
+      display_name: "[${bundle.target}] 7-Eleven Store Performance Dashboard"
+      file_path: ../dashboard/store_performance.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      embed_credentials: true
+      permissions:
+        - level: CAN_READ
+          group_name: users
+        - level: CAN_EDIT
+          user_name: ${workspace.current_user.userName}

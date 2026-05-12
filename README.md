@@ -15,6 +15,10 @@ This repository serves as a practical resource library for:
 
 Each project is self-contained with its own documentation, dependencies, and usage instructions. Browse the directories to find solutions relevant to your use case.
 
+### Featured projects
+
+- **[`apps/store-demo`](apps/store-demo/)** — 7-Eleven Store Intelligence: end-to-end retail demo with Silver/Gold UC tables, DLT pipeline, dashboards, Genie Space, AI sentiment, and a persona-based Streamlit app. Deployable via Databricks Asset Bundles.
+
 ## Getting Started
 
 1. Navigate to the specific project directory you're interested in

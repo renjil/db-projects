@@ -1,0 +1,1228 @@
+{
+  "datasets": [
+    {
+      "name": "executive_summary",
+      "displayName": "Executive Summary",
+      "queryLines": [
+        "SELECT mtd_sales, mtd_gp, mtd_gp_margin_pct, mtd_vs_budget_pct, ",
+        "ytd_sales, ytd_vs_budget_pct, ytd_yoy_growth_pct, mtd_writeoff_value ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_executive_summary"
+      ]
+    },
+    {
+      "name": "monthly_trend",
+      "displayName": "Monthly Trend",
+      "queryLines": [
+        "SELECT month_date, total_sales, total_gp, gp_margin_pct, ly_sales ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_monthly_sales_trend ",
+        "ORDER BY month_date"
+      ]
+    },
+    {
+      "name": "state_performance",
+      "displayName": "State Performance",
+      "queryLines": [
+        "SELECT state, total_sales, total_gp, gp_margin_pct, vs_budget_pct, ",
+        "yoy_growth_pct, transaction_count, store_count ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_state_performance"
+      ]
+    },
+    {
+      "name": "shrinkage_by_category",
+      "displayName": "Shrinkage by Category",
+      "queryLines": [
+        "SELECT category_name, writeoff_value, writeoff_qty, anomaly_count ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_shrinkage_by_category ",
+        "ORDER BY writeoff_value DESC"
+      ]
+    },
+    {
+      "name": "shrinkage_trend",
+      "displayName": "Shrinkage Trend",
+      "queryLines": [
+        "SELECT month_date, total_writeoff_value, anomaly_count ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_shrinkage_summary ",
+        "ORDER BY month_date"
+      ]
+    },
+    {
+      "name": "inventory_summary",
+      "displayName": "Inventory Summary",
+      "queryLines": [
+        "SELECT total_inventory_value, dead_stock_value, dead_stock_pct, ",
+        "oos_count, oos_risk_3d_count, overstock_value, avg_days_of_stock ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_inventory_summary"
+      ]
+    },
+    {
+      "name": "inventory_by_status",
+      "displayName": "Inventory by Status",
+      "queryLines": [
+        "SELECT stock_status, item_count, inventory_value ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_inventory_by_status"
+      ]
+    },
+    {
+      "name": "dead_stock_by_category",
+      "displayName": "Dead Stock by Category",
+      "queryLines": [
+        "SELECT category_name, item_count, dead_stock_value, avg_days_since_sale ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_dead_stock_by_category ",
+        "ORDER BY dead_stock_value DESC"
+      ]
+    },
+    {
+      "name": "category_performance",
+      "displayName": "Category Performance",
+      "queryLines": [
+        "SELECT category_name, department, total_sales, total_gp, gp_margin_pct, ",
+        "sales_share_pct, gp_share_pct, avg_yoy_sales_growth, vs_budget_pct ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_category_performance"
+      ]
+    },
+    {
+      "name": "budget_variance",
+      "displayName": "Budget Variance",
+      "queryLines": [
+        "SELECT month_date, month_label, state, actual_sales, budget_sales, ",
+        "sales_variance, sales_variance_pct, actual_gp, budget_gp, gp_variance, gp_variance_pct ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_budget_variance"
+      ]
+    },
+    {
+      "name": "budget_summary",
+      "displayName": "Budget Summary",
+      "queryLines": [
+        "SELECT SUM(actual_sales) as total_actual_sales, SUM(budget_sales) as total_budget_sales, ",
+        "SUM(actual_sales) - SUM(budget_sales) as total_sales_variance, ",
+        "ROUND((SUM(actual_sales) - SUM(budget_sales)) / NULLIF(SUM(budget_sales), 0) * 100, 2) as total_sales_variance_pct, ",
+        "SUM(actual_gp) as total_actual_gp, SUM(budget_gp) as total_budget_gp, ",
+        "SUM(actual_gp) - SUM(budget_gp) as total_gp_variance, ",
+        "ROUND((SUM(actual_gp) - SUM(budget_gp)) / NULLIF(SUM(budget_gp), 0) * 100, 2) as total_gp_variance_pct ",
+        "FROM renjiharold_demo.store_demo.vw_cfo_budget_variance"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "executive-summary",
+      "displayName": "Executive Summary",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "title",
+            "multilineTextboxSpec": {
+              "lines": ["## 7-Eleven CFO Executive Dashboard"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 6, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "mtd-sales",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_sales", "expression": "`mtd_sales`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "mtd_sales",
+                  "displayName": "MTD Sales",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "MTD Sales", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "mtd-gp",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_gp", "expression": "`mtd_gp`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "mtd_gp",
+                  "displayName": "MTD GP",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "MTD Gross Profit", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "mtd-margin",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_gp_margin_pct", "expression": "`mtd_gp_margin_pct`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "mtd_gp_margin_pct", "displayName": "MTD GP Margin %"}
+              },
+              "frame": {"title": "MTD GP Margin %", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "ytd-sales",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "ytd_sales", "expression": "`ytd_sales`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "ytd_sales",
+                  "displayName": "YTD Sales",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "YTD Sales", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "ytd-yoy-growth",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "ytd_yoy_growth_pct", "expression": "`ytd_yoy_growth_pct`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "ytd_yoy_growth_pct", "displayName": "YTD YoY Growth %"}
+              },
+              "frame": {"title": "YTD YoY Growth %", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "mtd-writeoffs",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_writeoff_value", "expression": "`mtd_writeoff_value`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "mtd_writeoff_value",
+                  "displayName": "MTD Write-offs",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "MTD Write-offs", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "monthly-sales-trend",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "monthly_trend",
+                "fields": [
+                  {"name": "month_date", "expression": "`month_date`"},
+                  {"name": "total_sales", "expression": "`total_sales`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "month_date", "scale": {"type": "temporal"}, "displayName": "Month"},
+                "y": {"fieldName": "total_sales", "scale": {"type": "quantitative"}, "displayName": "Sales ($)"}
+              },
+              "frame": {"title": "Monthly Sales Trend", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 7, "width": 4, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "sales-by-state-pie",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "state_performance",
+                "fields": [
+                  {"name": "state", "expression": "`state`"},
+                  {"name": "total_sales", "expression": "`total_sales`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {"fieldName": "total_sales", "scale": {"type": "quantitative"}, "displayName": "Sales"},
+                "color": {"fieldName": "state", "scale": {"type": "categorical"}, "displayName": "State"}
+              },
+              "frame": {"title": "Sales by State", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 7, "width": 2, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "state-table",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "state_performance",
+                "fields": [
+                  {"name": "state", "expression": "`state`"},
+                  {"name": "total_sales", "expression": "`total_sales`"},
+                  {"name": "total_gp", "expression": "`total_gp`"},
+                  {"name": "gp_margin_pct", "expression": "`gp_margin_pct`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "state", "displayName": "State"},
+                  {"fieldName": "total_sales", "displayName": "Sales ($)"},
+                  {"fieldName": "total_gp", "displayName": "GP ($)"},
+                  {"fieldName": "gp_margin_pct", "displayName": "Margin %"}
+                ]
+              },
+              "frame": {"title": "State Performance", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 12, "width": 6, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "revenue-profitability",
+      "displayName": "Revenue & Profitability",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "revenue-title",
+            "multilineTextboxSpec": {
+              "lines": ["## Revenue & Profitability Analysis"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 6, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "mtd-total-sales",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_sales", "expression": "`mtd_sales`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "mtd_sales",
+                  "displayName": "Total Sales",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "MTD Total Sales", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "mtd-total-gp",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_gp", "expression": "`mtd_gp`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "mtd_gp",
+                  "displayName": "Total GP",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "MTD Gross Profit", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "gp-margin-pct",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_gp_margin_pct", "expression": "`mtd_gp_margin_pct`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "mtd_gp_margin_pct", "displayName": "GP Margin %"}
+              },
+              "frame": {"title": "GP Margin %", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "sales-ty-vs-ly",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "monthly_trend",
+                "fields": [
+                  {"name": "month_date", "expression": "`month_date`"},
+                  {"name": "total_sales", "expression": "`total_sales`"},
+                  {"name": "ly_sales", "expression": "`ly_sales`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "month_date", "scale": {"type": "temporal"}, "displayName": "Month"},
+                "y": {"fieldName": "total_sales", "scale": {"type": "quantitative"}, "displayName": "TY Sales ($)"},
+                "y2": {"fieldName": "ly_sales", "scale": {"type": "quantitative"}, "displayName": "LY Sales ($)"}
+              },
+              "frame": {"title": "Monthly Sales: TY vs LY", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "gp-margin-trend",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "monthly_trend",
+                "fields": [
+                  {"name": "month_date", "expression": "`month_date`"},
+                  {"name": "gp_margin_pct", "expression": "`gp_margin_pct`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "month_date", "scale": {"type": "temporal"}, "displayName": "Month"},
+                "y": {"fieldName": "gp_margin_pct", "scale": {"type": "quantitative"}, "displayName": "GP Margin %"}
+              },
+              "frame": {"title": "GP Margin % Trend", "showTitle": true}
+            }
+          },
+          "position": {"x": 3, "y": 4, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "sales-by-state-bar",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "state_performance",
+                "fields": [
+                  {"name": "state", "expression": "`state`"},
+                  {"name": "total_sales", "expression": "`total_sales`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "total_sales", "scale": {"type": "quantitative"}, "displayName": "Sales ($)"},
+                "y": {"fieldName": "state", "scale": {"type": "categorical"}, "displayName": "State"}
+              },
+              "frame": {"title": "Sales by State", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 9, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "gp-by-category",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "category_performance",
+                "fields": [
+                  {"name": "category_name", "expression": "`category_name`"},
+                  {"name": "total_gp", "expression": "`total_gp`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "total_gp", "scale": {"type": "quantitative"}, "displayName": "GP ($)"},
+                "y": {"fieldName": "category_name", "scale": {"type": "categorical"}, "displayName": "Category"}
+              },
+              "frame": {"title": "GP by Category (Top 10)", "showTitle": true}
+            }
+          },
+          "position": {"x": 3, "y": 9, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "state-performance-table",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "state_performance",
+                "fields": [
+                  {"name": "state", "expression": "`state`"},
+                  {"name": "total_sales", "expression": "`total_sales`"},
+                  {"name": "total_gp", "expression": "`total_gp`"},
+                  {"name": "gp_margin_pct", "expression": "`gp_margin_pct`"},
+                  {"name": "vs_budget_pct", "expression": "`vs_budget_pct`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "state", "displayName": "State"},
+                  {"fieldName": "total_sales", "displayName": "Sales ($)"},
+                  {"fieldName": "total_gp", "displayName": "GP ($)"},
+                  {"fieldName": "gp_margin_pct", "displayName": "Margin %"},
+                  {"fieldName": "vs_budget_pct", "displayName": "vs Budget %"}
+                ]
+              },
+              "frame": {"title": "State Performance Summary", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 14, "width": 6, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "budget-performance",
+      "displayName": "Budget Performance",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "budget-title",
+            "multilineTextboxSpec": {
+              "lines": ["## Budget Performance Analysis"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 6, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "actual-sales",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_summary",
+                "fields": [{"name": "total_actual_sales", "expression": "`total_actual_sales`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_actual_sales",
+                  "displayName": "Actual Sales",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Actual Sales (YTD)", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "budget-sales",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_summary",
+                "fields": [{"name": "total_budget_sales", "expression": "`total_budget_sales`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_budget_sales",
+                  "displayName": "Budget Sales",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Budget Sales (YTD)", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "sales-variance-pct",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_summary",
+                "fields": [{"name": "total_sales_variance_pct", "expression": "`total_sales_variance_pct`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "total_sales_variance_pct", "displayName": "Variance %"}
+              },
+              "frame": {"title": "Sales Variance %", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "actual-gp",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_summary",
+                "fields": [{"name": "total_actual_gp", "expression": "`total_actual_gp`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_actual_gp",
+                  "displayName": "Actual GP",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Actual GP (YTD)", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "budget-gp",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_summary",
+                "fields": [{"name": "total_budget_gp", "expression": "`total_budget_gp`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_budget_gp",
+                  "displayName": "Budget GP",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Budget GP (YTD)", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "gp-variance-pct",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_summary",
+                "fields": [{"name": "total_gp_variance_pct", "expression": "`total_gp_variance_pct`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "total_gp_variance_pct", "displayName": "GP Variance %"}
+              },
+              "frame": {"title": "GP Variance %", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "actual-vs-budget-trend",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "budget_variance",
+                "fields": [
+                  {"name": "month_date", "expression": "`month_date`"},
+                  {"name": "sum(actual_sales)", "expression": "SUM(`actual_sales`)"},
+                  {"name": "sum(budget_sales)", "expression": "SUM(`budget_sales`)"}
+                ],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "month_date", "scale": {"type": "temporal"}, "displayName": "Month"},
+                "y": {"fieldName": "sum(actual_sales)", "scale": {"type": "quantitative"}, "displayName": "Actual ($)"},
+                "y2": {"fieldName": "sum(budget_sales)", "scale": {"type": "quantitative"}, "displayName": "Budget ($)"}
+              },
+              "frame": {"title": "Actual vs Budget by Month", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 7, "width": 6, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "variance-by-state",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "state_performance",
+                "fields": [
+                  {"name": "state", "expression": "`state`"},
+                  {"name": "vs_budget_pct", "expression": "`vs_budget_pct`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "vs_budget_pct", "scale": {"type": "quantitative"}, "displayName": "Variance %"},
+                "y": {"fieldName": "state", "scale": {"type": "categorical"}, "displayName": "State"}
+              },
+              "frame": {"title": "Budget Variance by State", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 12, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "budget-variance-table",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "state_performance",
+                "fields": [
+                  {"name": "state", "expression": "`state`"},
+                  {"name": "total_sales", "expression": "`total_sales`"},
+                  {"name": "vs_budget_pct", "expression": "`vs_budget_pct`"},
+                  {"name": "yoy_growth_pct", "expression": "`yoy_growth_pct`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "state", "displayName": "State"},
+                  {"fieldName": "total_sales", "displayName": "Sales ($)"},
+                  {"fieldName": "vs_budget_pct", "displayName": "vs Budget %"},
+                  {"fieldName": "yoy_growth_pct", "displayName": "YoY Growth %"}
+                ]
+              },
+              "frame": {"title": "State Budget Attainment", "showTitle": true}
+            }
+          },
+          "position": {"x": 3, "y": 12, "width": 3, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "cost-control",
+      "displayName": "Cost Control (Shrinkage)",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "shrinkage-title",
+            "multilineTextboxSpec": {
+              "lines": ["## Cost Control - Shrinkage Analysis"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 6, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "total-writeoff",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "executive_summary",
+                "fields": [{"name": "mtd_writeoff_value", "expression": "`mtd_writeoff_value`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "mtd_writeoff_value",
+                  "displayName": "MTD Write-off Value",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "MTD Write-off Value", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 3, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "anomaly-count",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "shrinkage_by_category",
+                "fields": [{"name": "sum(anomaly_count)", "expression": "SUM(`anomaly_count`)"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "sum(anomaly_count)", "displayName": "Anomaly Count"}
+              },
+              "frame": {"title": "Anomaly Count", "showTitle": true}
+            }
+          },
+          "position": {"x": 3, "y": 1, "width": 3, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "writeoff-by-category",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "shrinkage_by_category",
+                "fields": [
+                  {"name": "category_name", "expression": "`category_name`"},
+                  {"name": "writeoff_value", "expression": "`writeoff_value`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "writeoff_value", "scale": {"type": "quantitative"}, "displayName": "Value ($)"},
+                "y": {"fieldName": "category_name", "scale": {"type": "categorical"}, "displayName": "Category"}
+              },
+              "frame": {"title": "Write-off by Category", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "writeoff-trend",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "shrinkage_trend",
+                "fields": [
+                  {"name": "month_date", "expression": "`month_date`"},
+                  {"name": "total_writeoff_value", "expression": "`total_writeoff_value`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "month_date", "scale": {"type": "temporal"}, "displayName": "Month"},
+                "y": {"fieldName": "total_writeoff_value", "scale": {"type": "quantitative"}, "displayName": "Write-off Value ($)"}
+              },
+              "frame": {"title": "Monthly Write-off Trend", "showTitle": true}
+            }
+          },
+          "position": {"x": 3, "y": 4, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "shrinkage-table",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "shrinkage_by_category",
+                "fields": [
+                  {"name": "category_name", "expression": "`category_name`"},
+                  {"name": "writeoff_value", "expression": "`writeoff_value`"},
+                  {"name": "writeoff_qty", "expression": "`writeoff_qty`"},
+                  {"name": "anomaly_count", "expression": "`anomaly_count`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "category_name", "displayName": "Category"},
+                  {"fieldName": "writeoff_value", "displayName": "Value ($)"},
+                  {"fieldName": "writeoff_qty", "displayName": "Qty"},
+                  {"fieldName": "anomaly_count", "displayName": "Anomalies"}
+                ]
+              },
+              "frame": {"title": "Shrinkage by Category", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 9, "width": 6, "height": 5}
+        }
+      ]
+    },
+    {
+      "name": "working-capital",
+      "displayName": "Working Capital (Inventory)",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "inventory-title",
+            "multilineTextboxSpec": {
+              "lines": ["## Working Capital - Inventory Health"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 6, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "total-inventory",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_summary",
+                "fields": [{"name": "total_inventory_value", "expression": "`total_inventory_value`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_inventory_value",
+                  "displayName": "Total Inventory",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Total Inventory Value", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "dead-stock-value",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_summary",
+                "fields": [{"name": "dead_stock_value", "expression": "`dead_stock_value`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "dead_stock_value",
+                  "displayName": "Dead Stock Value",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Dead Stock Value", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "oos-count",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_summary",
+                "fields": [{"name": "oos_count", "expression": "`oos_count`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "oos_count", "displayName": "OOS Count"}
+              },
+              "frame": {"title": "Out of Stock Items", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 1, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "overstock-value",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_summary",
+                "fields": [{"name": "overstock_value", "expression": "`overstock_value`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "overstock_value",
+                  "displayName": "Overstock Value",
+                  "format": {"type": "number-currency", "currencyCode": "AUD", "abbreviation": "compact"}
+                }
+              },
+              "frame": {"title": "Overstock Value (>30d)", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "avg-days-stock",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_summary",
+                "fields": [{"name": "avg_days_of_stock", "expression": "`avg_days_of_stock`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "avg_days_of_stock", "displayName": "Avg Days of Stock"}
+              },
+              "frame": {"title": "Avg Days of Stock", "showTitle": true}
+            }
+          },
+          "position": {"x": 2, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "oos-risk",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_summary",
+                "fields": [{"name": "oos_risk_3d_count", "expression": "`oos_risk_3d_count`"}],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "oos_risk_3d_count", "displayName": "At Risk (<3d)"}
+              },
+              "frame": {"title": "Items at Risk (OOS <3d)", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 4, "width": 2, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "inventory-by-status-pie",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "inventory_by_status",
+                "fields": [
+                  {"name": "stock_status", "expression": "`stock_status`"},
+                  {"name": "inventory_value", "expression": "`inventory_value`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {"fieldName": "inventory_value", "scale": {"type": "quantitative"}, "displayName": "Value ($)"},
+                "color": {"fieldName": "stock_status", "scale": {"type": "categorical"}, "displayName": "Status"}
+              },
+              "frame": {"title": "Inventory by Stock Status", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 7, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "dead-stock-by-category",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "dead_stock_by_category",
+                "fields": [
+                  {"name": "category_name", "expression": "`category_name`"},
+                  {"name": "dead_stock_value", "expression": "`dead_stock_value`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "dead_stock_value", "scale": {"type": "quantitative"}, "displayName": "Value ($)"},
+                "y": {"fieldName": "category_name", "scale": {"type": "categorical"}, "displayName": "Category"}
+              },
+              "frame": {"title": "Dead Stock by Category", "showTitle": true}
+            }
+          },
+          "position": {"x": 3, "y": 7, "width": 3, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "dead-stock-table",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "dead_stock_by_category",
+                "fields": [
+                  {"name": "category_name", "expression": "`category_name`"},
+                  {"name": "item_count", "expression": "`item_count`"},
+                  {"name": "dead_stock_value", "expression": "`dead_stock_value`"},
+                  {"name": "avg_days_since_sale", "expression": "`avg_days_since_sale`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "category_name", "displayName": "Category"},
+                  {"fieldName": "item_count", "displayName": "Items"},
+                  {"fieldName": "dead_stock_value", "displayName": "Value ($)"},
+                  {"fieldName": "avg_days_since_sale", "displayName": "Avg Days Since Sale"}
+                ]
+              },
+              "frame": {"title": "Dead Stock Details", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 12, "width": 6, "height": 5}
+        }
+      ]
+    }
+  ]
+}

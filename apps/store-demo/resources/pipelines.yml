@@ -1,0 +1,30 @@
+resources:
+  pipelines:
+    gold_etl:
+      name: "[${bundle.target}] 7-Eleven Gold ETL"
+      catalog: ${var.catalog}
+      target: ${var.schema}
+      development: true
+      channel: CURRENT
+      photon: true
+      continuous: false
+      libraries:
+        - file:
+            path: ../src/dlt/01_silver_to_gold.sql
+        - file:
+            path: ../src/dlt/02_metrics_view.sql
+      clusters:
+        - label: default
+          autoscale:
+            min_workers: 1
+            max_workers: 2
+          spark_conf:
+            spark.databricks.delta.preview.enabled: "true"
+      configuration:
+        catalog: ${var.catalog}
+        schema: ${var.schema}
+      permissions:
+        - level: CAN_VIEW
+          group_name: users
+        - level: CAN_RUN
+          group_name: users
