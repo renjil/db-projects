@@ -4,10 +4,13 @@ databricks_host = "https://adb-XXXXXXXXXXXXXXXX.X.azuredatabricks.net"
 databricks_client_id     = "00000000-0000-0000-0000-000000000000"
 databricks_client_secret = "dose-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
-# The service principal that the Databricks App runs as (granted SUPERUSER on the Lakebase db)
-app_service_principal_application_id = "11111111-1111-1111-1111-111111111111"
+# Service principal that owns the Lakebase database
+# - Granted SUPERUSER inside the Postgres branch
+# - Granted CAN_USE on the workspace project
+db_owner_service_principal_application_id = "11111111-1111-1111-1111-111111111111"
 
-# Short organisation/team prefix (becomes the Lakebase project name prefix and tag value)
+# Short organisation/team prefix (becomes the Lakebase project name prefix, tag value,
+# and UC catalog prefix). Lowercase alphanumeric + underscore only.
 org_prefix = "acme"
 
 # Business domain (one project per domain - e.g. portfolio, risk, esg)
@@ -15,9 +18,17 @@ domain      = "portfolio"
 environment = "prod"
 cost_center = "data-platform"
 
-# Source Delta tables to sync into Lakebase
+# Source Delta table to sync into Lakebase.
+# All three values combine into <uc_source_catalog>.<uc_source_schema>.<uc_source_table>.
+# The table must exist before terraform apply.
 uc_source_catalog = "main"
 uc_source_schema  = "default"
+uc_source_table   = "holdings"
+
+# Primary key column(s) in the source Delta table.
+# Use multiple columns if the source has a composite key.
+synced_table_primary_key_columns = ["holding_id"]
 
 # Existing Databricks group whose members get read-only Postgres access
+# and workspace-level CAN_USE on the project. Group must already exist.
 analyst_group_display_name = "lakebase-analysts"

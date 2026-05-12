@@ -4,7 +4,7 @@ resource "databricks_postgres_role" "app_owner" {
 
   spec = {
     identity_type    = "SERVICE_PRINCIPAL"
-    postgres_role    = var.app_service_principal_application_id
+    postgres_role    = var.db_owner_service_principal_application_id
     auth_method      = "LAKEBASE_OAUTH_V1"
     membership_roles = ["DATABRICKS_SUPERUSER"]
   }
