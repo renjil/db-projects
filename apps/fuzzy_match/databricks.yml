@@ -1,0 +1,30 @@
+bundle:
+  name: fuzzy_match_app
+
+resources:
+  apps:
+    fuzzy_match:
+      name: "fuzzy-match"
+      source_code_path: .
+      description: "AI Fuzzy Match — AI-powered entity similarity matching using Databricks AI Functions"
+
+      config:
+        command:
+          - streamlit
+          - run
+          - app.py
+        env:
+          - name: DATABRICKS_WAREHOUSE_ID
+            valueFrom: sql-warehouse
+
+      permissions:
+        - level: CAN_USE
+          group_name: users
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://e2-demo-field-eng.cloud.databricks.com
+      root_path: /Workspace/Users/renji.harold@databricks.com/.bundle/${bundle.name}/${bundle.target}

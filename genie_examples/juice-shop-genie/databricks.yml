@@ -1,0 +1,65 @@
+bundle:
+  name: juice-shop-genie
+
+variables:
+  catalog:
+    description: Unity Catalog name for the Juice Shop tables
+    default: ${workspace.current_user.short_name}_demo
+  schema:
+    description: Schema name for the Juice Shop tables
+    default: juice_shop
+  warehouse_id:
+    description: SQL Warehouse ID (leave empty for auto-detection)
+    default: ""
+
+workspace:
+  root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}
+
+artifacts:
+  sql_scripts:
+    type: files
+    path: src/sql
+    files:
+      - "*.sql"
+
+resources:
+  jobs:
+    juice_shop_setup:
+      name: "[${bundle.name}] Setup Juice Shop Data"
+      tasks:
+        - task_key: create_schema
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: /Workspace${workspace.root_path}/files/src/sql/01_create_schema.sql
+
+        - task_key: create_tables
+          depends_on:
+            - task_key: create_schema
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: /Workspace${workspace.root_path}/files/src/sql/02_create_tables.sql
+
+        - task_key: load_sample_data
+          depends_on:
+            - task_key: create_tables
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: /Workspace${workspace.root_path}/files/src/sql/03_load_data.sql
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${DATABRICKS_HOST}
+
+  prod:
+    mode: production
+    workspace:
+      host: ${DATABRICKS_HOST}
+    variables:
+      catalog: production_catalog
+      schema: juice_shop

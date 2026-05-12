@@ -1,0 +1,18 @@
+{
+  "display_name": "Juice Shop Analytics",
+  "description": "Analytics dashboard for Juice Shop operations. Explore sales trends, customer behavior, product performance, and store metrics.\n\nSample Questions by Complexity:\n- Low: Basic counts and averages (questions 1-2)\n- Medium: Joins with GROUP BY (questions 3-4)\n- High: Multi-table analysis with business logic (questions 5-6)",
+  "tables": [
+    "${catalog}.${schema}.products",
+    "${catalog}.${schema}.customers",
+    "${catalog}.${schema}.orders"
+  ],
+  "sample_questions": [
+    "How many products do we sell?",
+    "What is the average price of our smoothies?",
+    "What are the top 3 best-selling products by revenue?",
+    "Show me total orders by store location and payment method",
+    "Which Gold and Platinum customers haven't ordered in April 2024?",
+    "Compare month-over-month revenue growth by product category"
+  ],
+  "instructions": "### Business Definitions\n\n- \"Revenue\" means: SUM(products.price * orders.quantity - orders.discount_applied)\n- \"Average order value\" or \"AOV\" means: total revenue divided by count of distinct orders\n- \"Active customer\" means: a customer who placed at least one order in the last 30 days\n- \"Best-selling\" refers to quantity sold unless the user specifies \"by revenue\"\n\n### Time Periods\n\n- \"This month\" refers to April 2024 (our most recent data)\n- \"Last month\" refers to March 2024\n- When users ask about \"recent\" orders, default to the last 30 days\n- Our fiscal year starts January 1\n\n### Product Categories\n\n- \"Wellness shots\" are small-sized, low-calorie health drinks (Immunity Booster, Energy Shot)\n- \"Seasonal products\" include Pumpkin Spice Dream (fall) and Watermelon Wave (summer)\n- When asked about \"healthy options\", prioritize organic products and those under 150 calories\n\n### Customer Segments\n\n- \"VIP customers\" means Gold or Platinum tier members\n- \"New customers\" means customers who signed up in the last 90 days\n- Customer lifetime value should be calculated as total revenue from all their orders\n\n### Store Operations\n\n- Morning shift: orders before 12:00\n- Afternoon shift: orders 12:00-17:00\n- Evening shift: orders after 17:00\n- Our busiest store is typically Downtown\n\n### Common Calculations\n\n- When showing percentages, round to 1 decimal place\n- When showing currency, format as USD with 2 decimal places\n- For rankings, show top 5 by default unless specified"
+}
