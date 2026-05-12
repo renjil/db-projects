@@ -1,0 +1,20 @@
+databricks_host = "https://adb-XXXXXXXXXXXXXXXX.X.azuredatabricks.net"
+
+# OAuth M2M service principal for Terraform itself
+databricks_client_id     = "00000000-0000-0000-0000-000000000000"
+databricks_client_secret = "dose-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+# The service principal that the Databricks App runs as (granted SUPERUSER on the Lakebase db)
+app_service_principal_application_id = "11111111-1111-1111-1111-111111111111"
+
+# Business domain (one project per domain - e.g. portfolio, risk, esg)
+domain      = "portfolio"
+environment = "prod"
+cost_center = "data-platform"
+
+# Source Delta tables to sync into Lakebase
+uc_source_catalog = "main"
+uc_source_schema  = "futurefund_portfolio"
+
+# Existing Databricks group whose members get read-only Postgres access
+analyst_group_display_name = "futurefund-analysts"
