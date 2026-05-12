@@ -7,6 +7,9 @@ databricks_client_secret = "dose-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 # The service principal that the Databricks App runs as (granted SUPERUSER on the Lakebase db)
 app_service_principal_application_id = "11111111-1111-1111-1111-111111111111"
 
+# Short organisation/team prefix (becomes the Lakebase project name prefix and tag value)
+org_prefix = "acme"
+
 # Business domain (one project per domain - e.g. portfolio, risk, esg)
 domain      = "portfolio"
 environment = "prod"
@@ -14,7 +17,7 @@ cost_center = "data-platform"
 
 # Source Delta tables to sync into Lakebase
 uc_source_catalog = "main"
-uc_source_schema  = "futurefund_portfolio"
+uc_source_schema  = "default"
 
 # Existing Databricks group whose members get read-only Postgres access
-analyst_group_display_name = "futurefund-analysts"
+analyst_group_display_name = "lakebase-analysts"

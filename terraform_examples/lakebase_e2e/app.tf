@@ -1,6 +1,6 @@
 resource "databricks_app" "this" {
-  name        = "futurefund-${var.domain}-app"
-  description = "Future Fund ${title(var.domain)} application backed by Lakebase Autoscaling"
+  name        = "lakebase-${var.domain}-app"
+  description = "${title(var.domain)} application backed by Lakebase Autoscaling"
 
   resources = [
     {

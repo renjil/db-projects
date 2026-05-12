@@ -3,7 +3,7 @@ resource "databricks_postgres_project" "this" {
 
   spec = {
     pg_version                 = 17
-    display_name               = "Future Fund - ${title(var.domain)} (${upper(var.environment)})"
+    display_name               = "${title(var.domain)} (${upper(var.environment)})"
     history_retention_duration = "2592000s"
 
     default_endpoint_settings = {

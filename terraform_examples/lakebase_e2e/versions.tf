@@ -8,11 +8,14 @@ terraform {
     }
   }
 
+  # Remote state is REQUIRED - Lakebase Autoscaling resources have no drift detection,
+  # so local state is unsafe for any multi-operator workflow.
+  # Replace the placeholder bucket/table/region below with your own (or swap for azurerm / gcs).
   backend "s3" {
-    bucket         = "futurefund-tfstate"
+    bucket         = "REPLACE-ME-tfstate"
     key            = "lakebase/terraform.tfstate"
-    region         = "ap-southeast-2"
-    dynamodb_table = "futurefund-tfstate-lock"
+    region         = "us-east-1"
+    dynamodb_table = "REPLACE-ME-tfstate-lock"
     encrypt        = true
   }
 }

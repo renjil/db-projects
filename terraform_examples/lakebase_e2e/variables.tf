@@ -15,6 +15,12 @@ variable "databricks_client_secret" {
   sensitive   = true
 }
 
+variable "org_prefix" {
+  description = "Short organisation/team identifier used as the prefix for the Lakebase project name and tag values."
+  type        = string
+  default     = "acme"
+}
+
 variable "domain" {
   description = "Business domain identifier (e.g. portfolio, risk, esg). Becomes the project suffix."
   type        = string
@@ -53,5 +59,5 @@ variable "app_service_principal_application_id" {
 variable "analyst_group_display_name" {
   description = "Existing Databricks group whose members get read-only Postgres access"
   type        = string
-  default     = "futurefund-analysts"
+  default     = "lakebase-analysts"
 }

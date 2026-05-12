@@ -1,5 +1,5 @@
 resource "databricks_postgres_catalog" "app" {
-  catalog_id = "ff_${var.domain}_app"
+  catalog_id = "${var.org_prefix}_${var.domain}_app"
 
   spec = {
     postgres_database          = databricks_postgres_database.app.spec.postgres_database
