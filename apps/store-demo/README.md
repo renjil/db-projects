@@ -1,4 +1,4 @@
-# 7-Eleven Store Intelligence — Databricks Demo
+# Store Intelligence — Databricks Demo
 
 A complete, deployable retail-operations demo on Databricks. Three personas
 (Store Associate, Store Manager, Regional Manager) consume Silver/Gold Unity
@@ -102,7 +102,7 @@ databricks apps deploy 7eleven-store-intelligence \
 
 In the Databricks UI:
 
-1. **Genie → New Space** → name it (e.g. "7-Eleven Store Assistant").
+1. **Genie → New Space** → name it (e.g. "Intelligent Store Assistant").
 2. **Add the 17 Gold tables** listed in the comment block at the top of `src/sql/04_genie_setup.sql` (`gold_daily_store_summary`, `gold_category_performance`, `gold_article_apsd`, … 17 total).
 3. **Open the Space's "Share" / permissions dialog** and grant the **app's service principal** at least **`CAN RUN`** on the Space. Without this, the app gets a permission error when calling Genie even if `GENIE_SPACE_ID` is set. Find the SP from:
    ```bash
