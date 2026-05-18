@@ -1,5 +1,125 @@
 resources:
   jobs:
+    # ------------------------------------------------------------------
+    # Orchestrator — one bundle run, all setup steps in dependency order.
+    # All tasks run on serverless compute; SQL notebooks use native widget
+    # substitution (${catalog}, ${schema}) from base_parameters.
+    #
+    # Gold-layer tables are managed entirely by the DLT pipeline (gold_etl);
+    # there is no separate "gold DDL" step.
+    #
+    # max_retries: 0 on every task — fail fast during demo/test runs.
+    # ------------------------------------------------------------------
+    setup_all:
+      name: "[${bundle.target}] 7-Eleven Setup — All Steps"
+      description: "End-to-end setup: silver DDL → load data → sentiment → Gold DLT → RLS → Genie comments → metric views → CFO views."
+      tasks:
+        - task_key: silver_ddl
+          max_retries: 0
+          notebook_task:
+            notebook_path: ../src/sql/01_silver_ddl.sql
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: load_data
+          max_retries: 0
+          depends_on:
+            - task_key: silver_ddl
+          notebook_task:
+            notebook_path: ../src/setup/load_data.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: sentiment
+          max_retries: 0
+          depends_on:
+            - task_key: load_data
+          notebook_task:
+            notebook_path: ../src/sql/02_sentiment_setup.sql
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: gold_etl
+          max_retries: 0
+          depends_on:
+            - task_key: sentiment
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.gold_etl.id}
+            full_refresh: false
+
+        - task_key: rls
+          max_retries: 0
+          depends_on:
+            - task_key: gold_etl
+          notebook_task:
+            notebook_path: ../src/sql/03_row_level_security.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: genie_comments
+          max_retries: 0
+          depends_on:
+            - task_key: rls
+          notebook_task:
+            notebook_path: ../src/sql/04_genie_setup.sql
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: metric_views
+          max_retries: 0
+          depends_on:
+            - task_key: genie_comments
+          notebook_task:
+            notebook_path: ../src/sql/05_metric_views.sql
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: cfo_views
+          max_retries: 0
+          depends_on:
+            - task_key: metric_views
+          notebook_task:
+            notebook_path: ../src/sql/06_cfo_views.sql
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+        - task_key: app_views
+          max_retries: 0
+          depends_on:
+            - task_key: cfo_views
+          notebook_task:
+            notebook_path: ../src/sql/07_app_views.sql
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          environment_key: serverless
+
+      environments:
+        - environment_key: serverless
+          spec:
+            client: "1"
+
+      tags:
+        project: 7eleven-store-intelligence
+        team: field-engineering
+
+    # ------------------------------------------------------------------
+    # Daily refresh — re-runs the Gold ETL DLT pipeline on a schedule.
+    # ------------------------------------------------------------------
     refresh_gold_layer:
       name: "[${bundle.target}] 7-Eleven Gold Refresh"
       description: "Daily refresh of Gold layer tables for 7-Eleven Store Intelligence"
@@ -9,6 +129,7 @@ resources:
         pause_status: UNPAUSED
       tasks:
         - task_key: run_gold_etl
+          max_retries: 0
           pipeline_task:
             pipeline_id: ${resources.pipelines.gold_etl.id}
             full_refresh: false
@@ -16,34 +137,3 @@ resources:
         project: 7eleven-store-intelligence
         team: field-engineering
         environment: ${bundle.target}
-      permissions:
-        - level: CAN_VIEW
-          group_name: users
-        - level: CAN_MANAGE_RUN
-          group_name: users
-
-    setup_rls:
-      name: "[${bundle.target}] 7-Eleven RLS Setup"
-      description: "One-time setup of Row-Level Security"
-      tasks:
-        - task_key: run_rls_setup
-          sql_task:
-            warehouse_id: ${var.warehouse_id}
-            file:
-              path: ../src/sql/04_row_level_security.sql
-      tags:
-        project: 7eleven-store-intelligence
-        team: field-engineering
-
-    setup_cfo_views:
-      name: "[${bundle.target}] 7-Eleven CFO Views Setup"
-      description: "Create CFO Executive Dashboard SQL views"
-      tasks:
-        - task_key: create_cfo_views
-          sql_task:
-            warehouse_id: ${var.warehouse_id}
-            file:
-              path: ../src/sql/07_cfo_views.sql
-      tags:
-        project: 7eleven-store-intelligence
-        team: field-engineering

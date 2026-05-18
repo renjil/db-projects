@@ -1,8 +1,20 @@
+-- Databricks notebook source
+CREATE WIDGET TEXT catalog DEFAULT '';
+CREATE WIDGET TEXT schema  DEFAULT '';
+
+-- COMMAND ----------
 -- ============================================================================
 -- 7-Eleven Store Intelligence Demo - Silver Layer DDL
 -- Catalog/Schema: passed in as ${catalog}.${schema}
 -- ============================================================================
+-- This is the first task in setup_all. It self-heals the schema (CREATE IF
+-- NOT EXISTS) so the customer never has to pre-create it manually — the
+-- catalog must already exist, but everything below is bundle-managed.
 
+-- COMMAND ----------
+CREATE SCHEMA IF NOT EXISTS ${catalog}.${schema};
+
+-- COMMAND ----------
 USE CATALOG ${catalog};
 USE SCHEMA ${schema};
 
@@ -34,8 +46,10 @@ CREATE OR REPLACE TABLE silver_stores (
   territory STRING,
   format_type STRING,
   open_date DATE,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  is_active BOOLEAN NOT NULL,
+  latitude DECIMAL(10,6),
+  longitude DECIMAL(10,6),
+  updated_at TIMESTAMP NOT NULL,
   CONSTRAINT pk_stores PRIMARY KEY (store_id),
   CONSTRAINT fk_stores_cluster FOREIGN KEY (cluster_id) REFERENCES silver_store_clusters(cluster_id)
 );
@@ -48,8 +62,8 @@ CREATE OR REPLACE TABLE silver_categories (
   subcategory STRING,
   department STRING,
   layout_group STRING,
-  is_food_service BOOLEAN DEFAULT FALSE,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_food_service BOOLEAN,
+  is_active BOOLEAN NOT NULL,
   CONSTRAINT pk_categories PRIMARY KEY (category_id)
 );
 
@@ -62,7 +76,7 @@ CREATE OR REPLACE TABLE silver_vendors (
   contact_phone STRING,
   lead_time_days INT,
   delivery_days STRING,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_active BOOLEAN NOT NULL,
   CONSTRAINT pk_vendors PRIMARY KEY (vendor_id)
 );
 
@@ -83,9 +97,9 @@ CREATE OR REPLACE TABLE silver_articles (
   min_order_qty INT,
   max_order_qty INT,
   shelf_life_days INT,
-  is_food_service BOOLEAN DEFAULT FALSE,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  is_food_service BOOLEAN,
+  is_active BOOLEAN NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
   CONSTRAINT pk_articles PRIMARY KEY (article_id),
   CONSTRAINT fk_articles_category FOREIGN KEY (category_id) REFERENCES silver_categories(category_id),
   CONSTRAINT fk_articles_vendor FOREIGN KEY (vendor_id) REFERENCES silver_vendors(vendor_id)
@@ -98,9 +112,9 @@ CREATE OR REPLACE TABLE silver_store_layouts (
   layout_location STRING NOT NULL,
   shelf_position STRING,
   facing_count INT,
-  is_tailored_in BOOLEAN NOT NULL DEFAULT TRUE,
+  is_tailored_in BOOLEAN NOT NULL,
   effective_date DATE NOT NULL,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_at TIMESTAMP NOT NULL,
   CONSTRAINT pk_store_layouts PRIMARY KEY (store_id, article_id),
   CONSTRAINT fk_layouts_store FOREIGN KEY (store_id) REFERENCES silver_stores(store_id),
   CONSTRAINT fk_layouts_article FOREIGN KEY (article_id) REFERENCES silver_articles(article_id)
@@ -114,7 +128,7 @@ CREATE OR REPLACE TABLE silver_team_members (
   member_name STRING NOT NULL,
   role STRING,
   hire_date DATE,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_active BOOLEAN NOT NULL,
   CONSTRAINT pk_team_members PRIMARY KEY (member_id),
   CONSTRAINT fk_members_store FOREIGN KEY (store_id) REFERENCES silver_stores(store_id)
 );
@@ -138,7 +152,7 @@ CREATE OR REPLACE TABLE silver_sales_transactions (
   revenue DECIMAL(12,2) NOT NULL,
   cost DECIMAL(12,2) NOT NULL,
   gross_profit DECIMAL(12,2) NOT NULL,
-  txn_type STRING NOT NULL DEFAULT 'SALE',
+  txn_type STRING NOT NULL,
   CONSTRAINT pk_sales PRIMARY KEY (txn_id),
   CONSTRAINT fk_sales_store FOREIGN KEY (store_id) REFERENCES silver_stores(store_id),
   CONSTRAINT fk_sales_article FOREIGN KEY (article_id) REFERENCES silver_articles(article_id)
@@ -160,7 +174,7 @@ CREATE OR REPLACE TABLE silver_inventory (
   last_sale_date DATE,
   days_since_last_sale INT,
   first_oos_date DATE,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_at TIMESTAMP NOT NULL,
   CONSTRAINT pk_inventory PRIMARY KEY (store_id, article_id),
   CONSTRAINT fk_inventory_store FOREIGN KEY (store_id) REFERENCES silver_stores(store_id),
   CONSTRAINT fk_inventory_article FOREIGN KEY (article_id) REFERENCES silver_articles(article_id)
@@ -220,6 +234,21 @@ CREATE OR REPLACE TABLE silver_budgets (
   CONSTRAINT fk_budgets_store FOREIGN KEY (store_id) REFERENCES silver_stores(store_id),
   CONSTRAINT fk_budgets_category FOREIGN KEY (category_id) REFERENCES silver_categories(category_id)
 );
+
+-- Customer Reviews (source data for the AI sentiment view created by setup_sentiment)
+CREATE TABLE IF NOT EXISTS silver_customer_reviews (
+    review_id BIGINT GENERATED ALWAYS AS IDENTITY,
+    store_id INT NOT NULL,
+    store_code STRING NOT NULL,
+    review_date DATE NOT NULL,
+    review_source STRING NOT NULL,  -- 'Google', 'Yelp', 'Survey', etc.
+    rating INT,                      -- 1-5 stars
+    review_text STRING NOT NULL,
+    customer_name STRING,
+    created_at TIMESTAMP
+)
+USING delta
+COMMENT 'Customer reviews from various sources (Google, Yelp, surveys) for sentiment analysis';
 
 -- ============================================================================
 -- VERIFY TABLES CREATED

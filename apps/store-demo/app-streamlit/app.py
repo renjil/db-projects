@@ -255,6 +255,20 @@ def render_content(tab: str):
     """Render content based on persona and selected tab."""
     persona = st.session_state.persona
 
+    # If get_stores() failed during load_stores(), show the actual exception so
+    # operators can diagnose. Without this, every failure mode (permission
+    # denied, missing column, network error, etc.) looks identical to "no data".
+    load_error = st.session_state.get("load_error")
+    if load_error:
+        st.error(
+            f"Could not load stores from the warehouse. The underlying error was:\n\n"
+            f"```\n{load_error}\n```\n\n"
+            "Check your `DATABRICKS_CATALOG` / `DATABRICKS_SCHEMA` / "
+            "`DATABRICKS_WAREHOUSE_ID` in `app-streamlit/app.yaml`, the app "
+            "service principal's permissions on the warehouse and schema, and "
+            "that `setup_all` ran cleanly."
+        )
+
     if persona == "store_associate":
         store = st.session_state.selected_store
         if store:

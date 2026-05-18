@@ -1,0 +1,14 @@
+resources:
+  apps:
+    store_intelligence:
+      name: "7eleven-store-intelligence"
+      description: "7-Eleven Store Intelligence — persona-based store ops UI with KPIs, inventory, write-offs, sentiment, and Genie chat."
+      source_code_path: ../app-streamlit
+      # Command and env vars live in app-streamlit/app.yaml — the source-of-truth
+      # for runtime config. Edit that file (catalog, schema, warehouse_id,
+      # GENIE_SPACE_ID) before `databricks apps deploy` (step 3 in README).
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE

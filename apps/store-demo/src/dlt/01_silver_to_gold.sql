@@ -248,10 +248,10 @@ SELECT
       )
     ELSE NULL
   END AS gp_vs_sales_growth_diff,
-  NULL AS budget_sales,
-  NULL AS budget_gp,
-  NULL AS sales_vs_budget_pct,
-  NULL AS gp_vs_budget_pct,
+  CAST(NULL AS DECIMAL(12,2)) AS budget_sales,
+  CAST(NULL AS DECIMAL(12,2)) AS budget_gp,
+  CAST(NULL AS DECIMAL(10,2)) AS sales_vs_budget_pct,
+  CAST(NULL AS DECIMAL(10,2)) AS gp_vs_budget_pct,
   ROUND(cs.cluster_avg_sales, 2) AS cluster_avg_sales,
   ROUND(cs.cluster_avg_gp, 2) AS cluster_avg_gp,
   CASE WHEN cs.cluster_avg_sales > 0
@@ -924,14 +924,14 @@ writeoff_anomaly_alerts AS (
   SELECT ROW_NUMBER() OVER (ORDER BY store_id, writeoff_date DESC) + 300000 AS alert_id, store_id, store_code, writeoff_date AS alert_date, CURRENT_TIMESTAMP() AS alert_time,
     'WRITEOFF_ANOMALY' AS alert_type, 'MEDIUM' AS alert_severity, CONCAT('High Write-off: ', category_name) AS alert_title,
     CONCAT(category_name, ' write-off $', ROUND(total_value, 2), ' is ', ROUND(ABS(std_dev_from_cluster), 1), ' std devs from cluster') AS alert_message,
-    NULL AS article_id, NULL AS article_name, category_name, total_value AS metric_value, cluster_avg_value AS threshold_value,
+    CAST(NULL AS INT) AS article_id, CAST(NULL AS STRING) AS article_name, category_name, total_value AS metric_value, cluster_avg_value AS threshold_value,
     'Review write-off practices and compare to cluster stores' AS action_recommended
   FROM gold_writeoff_summary WHERE is_anomaly = TRUE AND anomaly_direction = 'HIGH' AND writeoff_date >= DATE_SUB(CURRENT_DATE(), 7)
 )
-SELECT *, FALSE AS is_acknowledged, NULL AS acknowledged_by, NULL AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 7) AS expires_at FROM oos_alerts
+SELECT *, FALSE AS is_acknowledged, CAST(NULL AS STRING) AS acknowledged_by, CAST(NULL AS TIMESTAMP) AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 7) AS expires_at FROM oos_alerts
 UNION ALL
-SELECT *, FALSE AS is_acknowledged, NULL AS acknowledged_by, NULL AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 3) AS expires_at FROM projected_oos_alerts
+SELECT *, FALSE AS is_acknowledged, CAST(NULL AS STRING) AS acknowledged_by, CAST(NULL AS TIMESTAMP) AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 3) AS expires_at FROM projected_oos_alerts
 UNION ALL
-SELECT *, FALSE AS is_acknowledged, NULL AS acknowledged_by, NULL AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 14) AS expires_at FROM dead_stock_alerts
+SELECT *, FALSE AS is_acknowledged, CAST(NULL AS STRING) AS acknowledged_by, CAST(NULL AS TIMESTAMP) AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 14) AS expires_at FROM dead_stock_alerts
 UNION ALL
-SELECT *, FALSE AS is_acknowledged, NULL AS acknowledged_by, NULL AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 7) AS expires_at FROM writeoff_anomaly_alerts;
+SELECT *, FALSE AS is_acknowledged, CAST(NULL AS STRING) AS acknowledged_by, CAST(NULL AS TIMESTAMP) AS acknowledged_at, CURRENT_TIMESTAMP() AS created_at, DATE_ADD(CURRENT_DATE(), 7) AS expires_at FROM writeoff_anomaly_alerts;

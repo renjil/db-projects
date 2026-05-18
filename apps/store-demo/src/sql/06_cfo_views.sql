@@ -1,3 +1,8 @@
+-- Databricks notebook source
+CREATE WIDGET TEXT catalog DEFAULT '';
+CREATE WIDGET TEXT schema  DEFAULT '';
+
+-- COMMAND ----------
 -- ============================================================================
 -- 7-Eleven CFO Executive Dashboard - SQL Views
 -- Catalog/Schema: passed in as ${catalog}.${schema}

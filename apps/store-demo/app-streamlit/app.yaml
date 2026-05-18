@@ -1,25 +1,22 @@
-# Databricks App manifest for the 7-Eleven Store Intelligence Streamlit app.
-#
-# Before `databricks apps deploy`, replace the four placeholder values below
-# with your own workspace's IDs. The same catalog / schema / warehouse_id
-# must match what you used in databricks.yml for the bundle deploy.
-#
-# See the project README for the full deployment sequence.
+command:
+  - streamlit
+  - run
+  - app.py
+  - --server.port
+  - "8000"
+  - --server.address
+  - 0.0.0.0
 
-command: ['streamlit', 'run', 'app.py', '--server.port', '8000', '--server.address', '0.0.0.0']
-
+# Replace the four CHANGE_ME_* values below before `databricks apps deploy`.
+# These values must match the catalog / schema / warehouse_id used in
+# databricks.yml. GENIE_SPACE_ID is filled in after you create the Genie
+# Space manually (see README step 4).
 env:
   - name: DATABRICKS_WAREHOUSE_ID
-    value: "<YOUR_WAREHOUSE_ID>"
+    value: "CHANGE_ME_warehouse_id"
   - name: DATABRICKS_CATALOG
-    value: "<YOUR_CATALOG>"
+    value: "CHANGE_ME_catalog"
   - name: DATABRICKS_SCHEMA
-    value: "<YOUR_SCHEMA>"
+    value: "store_demo"
   - name: GENIE_SPACE_ID
-    value: "<YOUR_GENIE_SPACE_ID>"
-
-resources:
-  - name: sql-warehouse
-    sql_warehouse:
-      id: "<YOUR_WAREHOUSE_ID>"
-      permission: CAN_USE
+    value: "CHANGE_ME_genie_space_id"

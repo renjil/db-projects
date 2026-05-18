@@ -1,3 +1,8 @@
+-- Databricks notebook source
+CREATE WIDGET TEXT catalog DEFAULT '';
+CREATE WIDGET TEXT schema  DEFAULT '';
+
+-- COMMAND ----------
 -- ============================================================================
 -- 7-Eleven Store Intelligence Demo - Genie Space Setup
 -- ============================================================================
@@ -16,6 +21,20 @@ GENIE SPACE CONFIGURATION
 =========================
 
 Space Name: 7-Eleven Store Assistant
+
+REQUIRED: Grant the app's service principal CAN RUN on the Space.
+-----------------------------------------------------------------
+After creating the Space, open its "Share" / permissions dialog and add the
+Streamlit app's service principal with at least CAN RUN. Without this, the
+app receives a permission error when calling Genie even if GENIE_SPACE_ID
+is correctly set in app-streamlit/app.yaml.
+
+Find the SP from:
+   databricks apps get 7eleven-store-intelligence \
+     -o json | jq -r '.service_principal_client_id, .service_principal_name'
+
+In the Share dialog, paste either the UUID or the SP display name
+("app-<id> 7eleven-store-intelligence") and pick CAN RUN.
 
 Connected Tables (9 Gold tables):
 ---------------------------------

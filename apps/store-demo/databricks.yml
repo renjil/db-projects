@@ -1,28 +1,34 @@
 bundle:
   name: 7eleven-store-intelligence
 
+# Edit these three default values to match your workspace before
+# `databricks bundle deploy`. The Genie Space ID is NOT here — it lives
+# in `app-streamlit/app.yaml` because that's what the Apps runtime reads
+# (the bundle's apps.config.env block is not applied to the running app).
 variables:
   catalog:
-    description: "Unity Catalog name (required)"
+    description: "Unity Catalog name (must already exist)"
+    default: "CHANGE_ME_catalog"
   schema:
-    description: "Schema/database name (required)"
+    description: "Schema/database name within the catalog (created by setup_all)"
+    default: "store_demo"
   warehouse_id:
-    description: "SQL Warehouse ID for queries (required)"
-  genie_space_id:
-    description: "Genie Space ID - create via Databricks UI first (required)"
+    description: "SQL Warehouse ID used by jobs, dashboards, and the app"
+    default: "CHANGE_ME_warehouse_id"
 
 include:
   - ./resources/*.yml
 
+# No `mode: development` — we don't want DAB to prepend `dev_<user>_` to
+# resource names (would create `dev_<user>_<schema>`, `dev <user> <job>`, etc.).
+# Customers get clean, predictable names across all targets.
 targets:
   dev:
-    mode: development
     default: true
     workspace:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
 
   staging:
-    mode: development
     workspace:
       root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
 

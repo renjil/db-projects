@@ -215,6 +215,36 @@ def generate_store_clusters():
 def generate_stores(clusters):
     """Generate stores."""
     stores = []
+    # Suburb / city → (latitude, longitude). Each city the generator picks below
+    # MUST have a coordinate entry here, or the store will get NULL geo and
+    # vanish from the app's map. Values are real-world centroids.
+    city_coords = {
+        # VIC (Melbourne metro)
+        'Melbourne CBD':    (-37.8136, 144.9631),
+        'South Yarra':      (-37.8389, 144.9928),
+        'Richmond':         (-37.8197, 144.9938),
+        'St Kilda':         (-37.8675, 144.9810),
+        'Brunswick':        (-37.7674, 144.9594),
+        # NSW (Sydney metro)
+        'Sydney CBD':       (-33.8688, 151.2093),
+        'Bondi':            (-33.8915, 151.2767),
+        'Parramatta':       (-33.8150, 151.0011),
+        'Manly':            (-33.7967, 151.2853),
+        'Surry Hills':      (-33.8847, 151.2100),
+        # QLD (Brisbane / Gold Coast)
+        'Brisbane CBD':     (-27.4705, 153.0260),
+        'Gold Coast':       (-28.0167, 153.4000),
+        'Surfers Paradise': (-28.0023, 153.4145),
+        'Fortitude Valley': (-27.4570, 153.0349),
+        # SA (Adelaide metro)
+        'Adelaide CBD':     (-34.9285, 138.6007),
+        'Glenelg':          (-34.9810, 138.5152),
+        'Norwood':          (-34.9202, 138.6280),
+        # WA (Perth metro)
+        'Perth CBD':        (-31.9505, 115.8605),
+        'Fremantle':        (-32.0569, 115.7439),
+        'Subiaco':          (-31.9476, 115.8260),
+    }
     cities = {
         'VIC': ['Melbourne CBD', 'South Yarra', 'Richmond', 'St Kilda', 'Brunswick'],
         'NSW': ['Sydney CBD', 'Bondi', 'Parramatta', 'Manly', 'Surry Hills'],
@@ -227,6 +257,7 @@ def generate_stores(clusters):
     for i in range(NUM_STORES):
         state = STATES[i % len(STATES)]
         city = random.choice(cities[state])
+        lat, lon = city_coords[city]
         cluster = random.choice([c for c in clusters if c['state'] == state])
 
         stores.append({
@@ -241,7 +272,9 @@ def generate_stores(clusters):
             'territory': f'{state} {cluster["region"]}',
             'format_type': random.choice(FORMAT_TYPES),
             'open_date': (date.today() - timedelta(days=random.randint(365, 3650))).isoformat(),
-            'is_active': True
+            'is_active': True,
+            'latitude': lat,
+            'longitude': lon,
         })
         store_id += 1
     return stores
@@ -684,7 +717,6 @@ def generate_customer_reviews(stores):
     - Underperformers: more negative reviews
     """
     reviews = []
-    review_id = 1
 
     # Store performance profiles (1=underperformer, 2=average, 3=high performer)
     store_profiles = {
@@ -775,7 +807,8 @@ def generate_customer_reviews(stores):
             review_date = date.today() - timedelta(days=random.randint(1, 30))
 
             reviews.append({
-                'review_id': review_id,
+                # review_id is omitted intentionally — the Silver table's
+                # `review_id` column is GENERATED ALWAYS AS IDENTITY.
                 'store_id': store_id,
                 'store_code': store['store_code'],
                 'review_date': review_date.isoformat(),
@@ -784,7 +817,6 @@ def generate_customer_reviews(stores):
                 'review_text': review_text,
                 'customer_name': random.choice(customer_names)
             })
-            review_id += 1
 
     return reviews
 

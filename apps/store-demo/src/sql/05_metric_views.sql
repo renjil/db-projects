@@ -1,3 +1,8 @@
+-- Databricks notebook source
+CREATE WIDGET TEXT catalog DEFAULT '';
+CREATE WIDGET TEXT schema  DEFAULT '';
+
+-- COMMAND ----------
 -- ============================================================================
 -- 7-Eleven Store Intelligence Demo - Metric Views for Genie & AI/BI
 -- Catalog/Schema: passed in as ${catalog}.${schema}
@@ -39,7 +44,7 @@ dimensions:
     expr: day_of_week
     comment: "Day of week (1=Sunday, 7=Saturday)"
   - name: Day Name
-    expr: day_name
+    expr: "CASE day_of_week WHEN 1 THEN 'Sunday' WHEN 2 THEN 'Monday' WHEN 3 THEN 'Tuesday' WHEN 4 THEN 'Wednesday' WHEN 5 THEN 'Thursday' WHEN 6 THEN 'Friday' WHEN 7 THEN 'Saturday' END"
     comment: "Day name (Monday, Tuesday, etc.)"
   - name: Is Weekend
     expr: is_weekend
@@ -150,7 +155,7 @@ measures:
     expr: ROUND(AVG(yoy_sales_growth), 2)
     comment: "Year-over-year category growth"
   - name: vs Cluster %
-    expr: ROUND(AVG(vs_cluster_pct), 2)
+    expr: ROUND(AVG(vs_cluster_sales_pct), 2)
     comment: "Category performance vs cluster average"
   - name: Cluster Avg Sales
     expr: AVG(cluster_avg_sales)
@@ -226,7 +231,7 @@ measures:
     expr: ROUND(AVG(vs_cluster_apsd_pct), 2)
     comment: "APSD performance vs cluster average"
   - name: Days Sold
-    expr: SUM(days_sold)
+    expr: SUM(days_in_period)
     comment: "Number of days with sales"
 $$;
 
@@ -270,13 +275,7 @@ dimensions:
     expr: is_dead_stock
     comment: "Whether item has no sales in 28+ days"
   - name: Stock Status
-    expr: CASE
-      WHEN is_out_of_stock THEN 'Out of Stock'
-      WHEN is_dead_stock THEN 'Dead Stock'
-      WHEN days_of_stock < 3 THEN 'Low Stock'
-      WHEN days_of_stock > 30 THEN 'Overstock'
-      ELSE 'Normal'
-    END
+    expr: "CASE WHEN is_out_of_stock THEN 'Out of Stock' WHEN is_dead_stock THEN 'Dead Stock' WHEN days_of_stock < 3 THEN 'Low Stock' WHEN days_of_stock > 30 THEN 'Overstock' ELSE 'Normal' END"
     comment: "Current stock status category"
 
 measures:
@@ -343,7 +342,7 @@ dimensions:
     expr: reason_code
     comment: "Write-off reason code"
   - name: Reason Description
-    expr: reason_description
+    expr: reason_code
     comment: "Write-off reason description"
   - name: Date
     expr: writeoff_date
@@ -366,7 +365,7 @@ measures:
     expr: SUM(total_qty)
     comment: "Total write-off quantity"
   - name: Write-off Cost
-    expr: SUM(total_cost)
+    expr: SUM(total_value)
     comment: "Total write-off cost"
   - name: Cluster Avg Write-off
     expr: AVG(cluster_avg_value)
@@ -418,7 +417,7 @@ dimensions:
     expr: day_of_week
     comment: "Day of week (1=Sunday)"
   - name: Day Name
-    expr: day_name
+    expr: "CASE day_of_week WHEN 1 THEN 'Sunday' WHEN 2 THEN 'Monday' WHEN 3 THEN 'Tuesday' WHEN 4 THEN 'Wednesday' WHEN 5 THEN 'Thursday' WHEN 6 THEN 'Friday' WHEN 7 THEN 'Saturday' END"
     comment: "Day name"
   - name: Hour
     expr: hour_of_day
@@ -430,13 +429,7 @@ dimensions:
     expr: is_lunch_peak
     comment: "Whether it's lunch peak hour (11am-2pm)"
   - name: Time Period
-    expr: CASE
-      WHEN hour_of_day BETWEEN 6 AND 10 THEN 'Morning'
-      WHEN hour_of_day BETWEEN 11 AND 14 THEN 'Lunch'
-      WHEN hour_of_day BETWEEN 15 AND 17 THEN 'Afternoon'
-      WHEN hour_of_day BETWEEN 18 AND 21 THEN 'Evening'
-      ELSE 'Night'
-    END
+    expr: "CASE WHEN hour_of_day BETWEEN 6 AND 10 THEN 'Morning' WHEN hour_of_day BETWEEN 11 AND 14 THEN 'Lunch' WHEN hour_of_day BETWEEN 15 AND 17 THEN 'Afternoon' WHEN hour_of_day BETWEEN 18 AND 21 THEN 'Evening' ELSE 'Night' END"
     comment: "Time period of day"
 
 measures:
@@ -449,7 +442,7 @@ measures:
   - name: Cook Qty with Growth
     expr: ROUND(AVG(recommended_cook_qty_growth), 0)
     comment: "Recommended cook qty with 10% growth buffer"
-  - name: % of Daily Units
+  - name: "% of Daily Units"
     expr: ROUND(AVG(pct_of_daily_units), 2)
     comment: "Percentage of daily units sold in this hour"
   - name: Std Dev Units
@@ -472,17 +465,14 @@ comment: "Store operational alerts for proactive management"
 source: ${catalog}.${schema}.gold_store_alerts
 
 dimensions:
-  - name: Store
-    expr: store_name
-    comment: "Store name"
   - name: Store ID
     expr: store_id
-    comment: "Unique store identifier"
+    comment: "Store identifier (alerts table has no store_name)"
   - name: Alert Type
     expr: alert_type
     comment: "Type of alert (OOS, Projected OOS, Dead Stock, Write-off Anomaly)"
   - name: Severity
-    expr: severity
+    expr: alert_severity
     comment: "Alert severity (Critical, High, Medium, Low)"
   - name: Category
     expr: category_name
@@ -499,10 +489,10 @@ measures:
     expr: COUNT(*)
     comment: "Total number of alerts"
   - name: Critical Alerts
-    expr: SUM(CASE WHEN severity = 'Critical' THEN 1 ELSE 0 END)
+    expr: SUM(CASE WHEN alert_severity = 'Critical' THEN 1 ELSE 0 END)
     comment: "Number of critical alerts"
   - name: High Alerts
-    expr: SUM(CASE WHEN severity = 'High' THEN 1 ELSE 0 END)
+    expr: SUM(CASE WHEN alert_severity = 'High' THEN 1 ELSE 0 END)
     comment: "Number of high severity alerts"
   - name: OOS Alerts
     expr: SUM(CASE WHEN alert_type = 'OOS' THEN 1 ELSE 0 END)
@@ -517,7 +507,7 @@ measures:
     expr: SUM(CASE WHEN alert_type = 'Write-off Anomaly' THEN 1 ELSE 0 END)
     comment: "Write-off anomaly alerts"
   - name: Alert Value
-    expr: SUM(alert_value)
+    expr: SUM(metric_value)
     comment: "Total monetary value of alerts"
 $$;
 

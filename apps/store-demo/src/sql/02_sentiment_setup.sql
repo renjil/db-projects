@@ -1,3 +1,8 @@
+-- Databricks notebook source
+CREATE WIDGET TEXT catalog DEFAULT '';
+CREATE WIDGET TEXT schema  DEFAULT '';
+
+-- COMMAND ----------
 -- ============================================================================
 -- 7-Eleven Store Intelligence Demo - Sentiment Analysis Setup
 -- Catalog/Schema: passed in as ${catalog}.${schema}
@@ -10,23 +15,9 @@
 --   - Foundation Model API enabled (for vw_review_sentiment_ai)
 -- ============================================================================
 
--- ============================================================================
--- SILVER LAYER: Customer Reviews (Source Data)
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS ${catalog}.${schema}.silver_customer_reviews (
-    review_id INT GENERATED ALWAYS AS IDENTITY,
-    store_id INT NOT NULL,
-    store_code STRING NOT NULL,
-    review_date DATE NOT NULL,
-    review_source STRING NOT NULL,  -- 'Google', 'Yelp', 'Survey', etc.
-    rating INT,                      -- 1-5 stars
-    review_text STRING NOT NULL,
-    customer_name STRING,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
-)
-USING delta
-COMMENT 'Customer reviews from various sources (Google, Yelp, surveys) for sentiment analysis';
+-- silver_customer_reviews is created by setup_silver_ddl (01_silver_ddl.sql)
+-- and loaded by load_data. This notebook only adds the AI sentiment view
+-- and the aggregated gold_store_sentiment table on top of it.
 
 -- ============================================================================
 -- AI VIEW: Real-time Sentiment Analysis using Foundation Model API
@@ -79,6 +70,90 @@ CREATE TABLE IF NOT EXISTS ${catalog}.${schema}.gold_store_sentiment (
 )
 USING delta
 COMMENT 'Aggregated customer sentiment metrics per store for dashboard display';
+
+-- COMMAND ----------
+-- ============================================================================
+-- Populate gold_store_sentiment by aggregating the AI sentiment view per store.
+-- Runs at setup time so the app's get_store_sentiment query has data. (For
+-- ongoing freshness, schedule this same statement on a job.)
+-- Note: vw_review_sentiment_ai calls ai_query() per row — materializing here
+-- makes that cost one-shot rather than per-app-query.
+--
+-- The AI returns: {"sentiment": "...", "themes": ["...", ...]}.
+-- We parse, aggregate review-level metrics, EXPLODE themes, and pick the top
+-- 5 themes per (store, sentiment) to render in the app's "What customers love"
+-- and "Areas for improvement" cards.
+-- ============================================================================
+INSERT OVERWRITE ${catalog}.${schema}.gold_store_sentiment
+WITH parsed AS (
+    SELECT
+        v.store_id,
+        v.store_code,
+        v.rating,
+        LOWER(TRIM(GET_JSON_OBJECT(v.ai_analysis, '$.sentiment')))                   AS sentiment,
+        from_json(GET_JSON_OBJECT(v.ai_analysis, '$.themes'), 'ARRAY<STRING>')       AS themes
+    FROM ${catalog}.${schema}.vw_review_sentiment_ai v
+),
+agg AS (
+    SELECT
+        p.store_id,
+        p.store_code,
+        CAST(ROUND(AVG(p.rating), 1) AS DECIMAL(2,1))                              AS overall_rating,
+        COUNT(*)                                                                    AS review_count,
+        CAST(ROUND(100.0 * SUM(CASE WHEN p.sentiment = 'positive' THEN 1 ELSE 0 END) / COUNT(*), 1) AS DECIMAL(4,1)) AS positive_pct,
+        CAST(ROUND(100.0 * SUM(CASE WHEN p.sentiment = 'neutral'  THEN 1 ELSE 0 END) / COUNT(*), 1) AS DECIMAL(4,1)) AS neutral_pct,
+        CAST(ROUND(100.0 * SUM(CASE WHEN p.sentiment = 'negative' THEN 1 ELSE 0 END) / COUNT(*), 1) AS DECIMAL(4,1)) AS negative_pct
+    FROM parsed p
+    GROUP BY p.store_id, p.store_code
+),
+theme_per_review AS (
+    SELECT p.store_id, p.sentiment, LOWER(TRIM(t.theme)) AS theme
+    FROM parsed p
+    LATERAL VIEW EXPLODE(p.themes) t AS theme
+    WHERE p.sentiment IN ('positive', 'negative') AND t.theme IS NOT NULL AND TRIM(t.theme) <> ''
+),
+theme_counts AS (
+    SELECT store_id, sentiment, theme, COUNT(*) AS cnt
+    FROM theme_per_review
+    GROUP BY store_id, sentiment, theme
+),
+ranked AS (
+    SELECT store_id, sentiment, theme,
+           ROW_NUMBER() OVER (PARTITION BY store_id, sentiment ORDER BY cnt DESC, theme) AS rn
+    FROM theme_counts
+),
+top_themes AS (
+    SELECT store_id, sentiment, CONCAT_WS(', ', COLLECT_LIST(theme)) AS themes_json
+    FROM ranked
+    WHERE rn <= 5
+    GROUP BY store_id, sentiment
+),
+themes_pivoted AS (
+    SELECT
+        store_id,
+        MAX(CASE WHEN sentiment = 'positive' THEN themes_json END) AS top_positive_themes,
+        MAX(CASE WHEN sentiment = 'negative' THEN themes_json END) AS top_negative_themes
+    FROM top_themes
+    GROUP BY store_id
+)
+SELECT
+    a.store_id,
+    a.store_code,
+    s.store_name,
+    a.overall_rating,
+    CAST(a.positive_pct - a.negative_pct AS INT)                  AS sentiment_score,
+    CAST(a.review_count AS INT)                                   AS review_count,
+    a.positive_pct,
+    a.neutral_pct,
+    a.negative_pct,
+    tp.top_positive_themes,
+    tp.top_negative_themes,
+    'stable'                                                      AS trend_direction,
+    CAST(a.positive_pct - a.negative_pct AS INT)                  AS nps_score,
+    CURRENT_DATE()                                                AS last_updated
+FROM agg a
+LEFT JOIN ${catalog}.${schema}.silver_stores s  ON s.store_id  = a.store_id
+LEFT JOIN themes_pivoted tp                     ON tp.store_id = a.store_id;
 
 -- ============================================================================
 -- HELPER PROCEDURE: Refresh Gold Sentiment Table
