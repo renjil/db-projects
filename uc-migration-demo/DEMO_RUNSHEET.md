@@ -13,7 +13,7 @@ export DBX_HOST="https://<field-demo-workspace>.cloud.databricks.com"   # fill i
 export DBX_PROFILE="fielddemo"
 ```
 ```
-CATALOG      = ff_uc_demo          # target UC catalog (create, or swap for a writable one)
+CATALOG      = acme_uc_demo          # target UC catalog (create, or swap for a writable one)
 SCHEMA       = portfolio
 LEGACY       = hive_metastore.portfolio
 SQL_WAREHOUSE = <a Medium+ serverless SQL warehouse>   # for running SQL / validation
@@ -35,7 +35,7 @@ SQL_WAREHOUSE = <a Medium+ serverless SQL warehouse>   # for running SQL / valid
 Create a Python notebook in the field-demo workspace and run these cells. This builds a realistic legacy `hive_metastore.portfolio` estate plus the UC target shell.
 
 ```python
-CATALOG = "ff_uc_demo"; SCHEMA = "portfolio"
+CATALOG = "acme_uc_demo"; SCHEMA = "portfolio"
 DBFS_LANDING = "dbfs:/tmp/ff_uc_demo/landing/transactions"   # simulated legacy "mount"
 
 # --- target UC shell ---
