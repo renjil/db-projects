@@ -1,0 +1,21 @@
+resources:
+  jobs:
+    pattern_a_medallion:
+      name: "[${bundle.target}] Pattern A - UC medallion"
+      tasks:
+        - task_key: bronze_ingest
+          notebook_task:
+            notebook_path: ../src/01_bronze_ingest.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+        - task_key: silver_gold
+          depends_on:
+            - task_key: bronze_ingest
+          notebook_task:
+            notebook_path: ../src/02_silver_gold.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+      queue:
+        enabled: true

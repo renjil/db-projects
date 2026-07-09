@@ -18,6 +18,7 @@ Each project is self-contained with its own documentation, dependencies, and usa
 ### Featured projects
 
 - **[`apps/store-demo`](apps/store-demo/)** — 7-Eleven Store Intelligence: end-to-end retail demo with Silver/Gold UC tables, DLT pipeline, dashboards, Genie Space, AI sentiment, and a persona-based Streamlit app. Deployable via Databricks Asset Bundles.
+- **[`uc-migration-demo`](uc-migration-demo/)** — Unity Catalog Migration Demo Kit: two legacy Hive-metastore reference pipelines (notebook + DBFS mounts, and SQL + external tables) with side-by-side UC-migrated versions (Volumes, external locations, grants, DABs), plus a Claude Code skill that encodes house migration conventions with analyse / plan / migrate / validate commands.
 
 ## Getting Started
 

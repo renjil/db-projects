@@ -1,0 +1,7 @@
+resources:
+  volumes:
+    landing:
+      catalog_name: ${var.catalog}
+      schema_name: ${var.schema}
+      name: "landing"
+      volume_type: "MANAGED"
