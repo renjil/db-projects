@@ -39,5 +39,5 @@ Wrap into a Claude Code plugin (`.claude-plugin/plugin.json` + `skills/` + `comm
 
 ## Notes / honesty
 - Commands are named `uc-*` to avoid clashing with other `/plan` etc. commands - rename if you prefer bare `/analyse`, `/plan`, `/migrate`.
-- The skill is a **starter** seeded from two synthetic reference pipelines. Replace the legacy samples with Acme's real reference pipelines and tighten the house conventions to make it authoritative.
+- The skill is a **starter** seeded from two synthetic reference pipelines. Replace the legacy samples with real reference pipelines and tighten the house conventions to make it authoritative.
 - `SYNC` is external-table-only; managed tables use `DEEP CLONE`/CTAS or UCX. The skill encodes this, but validate on your real tables before trusting it broadly.

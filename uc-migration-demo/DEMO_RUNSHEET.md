@@ -13,7 +13,7 @@ export DBX_HOST="https://<field-demo-workspace>.cloud.databricks.com"   # fill i
 export DBX_PROFILE="fielddemo"
 ```
 ```
-CATALOG      = acme_uc_demo          # target UC catalog (create, or swap for a writable one)
+CATALOG      = rh_uc_demo          # target UC catalog (create, or swap for a writable one)
 SCHEMA       = portfolio
 LEGACY       = hive_metastore.portfolio
 SQL_WAREHOUSE = <a Medium+ serverless SQL warehouse>   # for running SQL / validation
@@ -35,7 +35,7 @@ SQL_WAREHOUSE = <a Medium+ serverless SQL warehouse>   # for running SQL / valid
 Create a Python notebook in the field-demo workspace and run these cells. This builds a realistic legacy `hive_metastore.portfolio` estate plus the UC target shell.
 
 ```python
-CATALOG = "acme_uc_demo"; SCHEMA = "portfolio"
+CATALOG = "rh_uc_demo"; SCHEMA = "portfolio"
 DBFS_LANDING = "dbfs:/tmp/ff_uc_demo/landing/transactions"   # simulated legacy "mount"
 
 # --- target UC shell ---
@@ -176,6 +176,6 @@ Also remove the generated `migrated/` folder and `databricks bundle destroy -t d
 
 ## Talking points
 - The legacy estate is real (`hive_metastore`), so this is a genuine HMS->UC migration, not a mock.
-- The agent applied *Acme patterns* via the custom skill - consistent, reviewable, reconciled.
+- The agent applied *Org patterns* via the custom skill - consistent, reviewable, reconciled.
 - Read-only analyse/plan first, human-approved migrate, validated before cutover - safe by design.
 - Same skill scales to your real reference pipelines; seed it with them next.

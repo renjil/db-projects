@@ -1,4 +1,4 @@
-# Acme - UC Migration demo kit
+# Agentic UC Migration demo kit
 
 A self-contained kit for demonstrating (and running) **AI-assisted Hive-metastore → Unity Catalog migration** with the Databricks agent skills, plus a purpose-built **`uc-migration` skill**.
 
@@ -30,4 +30,4 @@ Every UC-enabled workspace still exposes the legacy **`hive_metastore`** catalog
 4. `/uc-migrate` to generate UC-compatible code + SYNC/CLONE SQL + UC grants + a DAB.
 5. `/uc-validate` to reconcile the migrated tables against the legacy ones.
 
-> These legacy pipelines are intentionally written with common non-UC patterns. See each pattern's README for the specific incompatibilities the skill is expected to find and fix. Replace them with your own real reference pipelines when you're ready - the skill is designed to encode Acme house patterns.
+> These legacy pipelines are intentionally written with common non-UC patterns. See each pattern's README for the specific incompatibilities the skill is expected to find and fix. Replace them with your own real reference pipelines when you're ready - the skill is designed to encode organizational (house) patterns.

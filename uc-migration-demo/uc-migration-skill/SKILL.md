@@ -1,7 +1,7 @@
 ---
 name: uc-migration
 description: >-
-  Migrate legacy Hive metastore pipelines and datasets to Unity Catalog using Acme
+  Migrate legacy Hive metastore pipelines and datasets to Unity Catalog using your organizations
   house patterns. Use when converting non-UC pipelines/notebooks/SQL to UC-compatible code,
   assessing or planning a Hive-metastore-to-Unity-Catalog migration, mapping DBFS mounts to
   Volumes or External Locations, translating Hive ACLs to UC grants, or running SYNC/DEEP CLONE.
@@ -9,9 +9,9 @@ description: >-
   "make this pipeline UC ready", "upgrade to unity catalog".
 ---
 
-# Unity Catalog Migration (Acme)
+# Unity Catalog Agentic Migration
 
-Convert legacy Hive-metastore (HMS) pipelines and datasets to Unity Catalog, following Acme's proven reference patterns. This skill encodes the house approach so every engineer's migration is consistent, reviewable, and reconciled.
+Convert legacy Hive-metastore (HMS) pipelines and datasets to Unity Catalog, following proven reference patterns. This skill encodes the house approach so every engineer's migration is consistent, reviewable, and reconciled.
 
 ## When to use
 - A pipeline/notebook/SQL uses `hive_metastore`, 2-level names, DBFS mounts, or Hive ACLs and needs to become UC-compatible.
@@ -26,7 +26,7 @@ Convert legacy Hive-metastore (HMS) pipelines and datasets to Unity Catalog, fol
 
 Use them in order; each is safe to run repeatedly. `/uc-analyse` and `/uc-plan` never change anything.
 
-## House conventions (fill these in for Acme)
+## House conventions (fill these in for your organization)
 Set these once so the agent applies them consistently. Replace the placeholders:
 - Target catalogs: `<dev_catalog>`, `<prod_catalog>` (e.g. per-domain catalogs).
 - Schema mapping: HMS `db` → UC `catalog.db` (keep schema names unless there's a house rule).
